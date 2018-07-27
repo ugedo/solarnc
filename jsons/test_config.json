@@ -1,10 +1,11 @@
 {
 	"path": "out/",
 	"outpath": "out_test/",
-	"skip existing": true,
 	"features": [
-		{"function": "csm_page"}
+		{"function": "test_feature", "args": [10]},
+		{"function": "test_feature", "args": [20]}
 	],
+	"skip existing": true,
     "stations": {
         "AP1": {
             "nsamples": 12,

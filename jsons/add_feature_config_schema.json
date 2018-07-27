@@ -1,0 +1,30 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"title": "A json schema for add_feature.py config file",
+	"type": "object",
+	"definitions": {
+		"feature": {
+			"type": "object",
+			"properties": {
+				"function": {"type": "string"},
+				"args": {"type": "array"}
+			},
+			"required": ["function"]
+		}
+	},
+	"properties": {
+		"path": {"type": "string"},
+		"outpath": {"type": "string"},
+		"features": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/feature",
+				"minItems": 1
+			}
+		},
+		"skip existing": {"type": "boolean"},
+		"stations": {"type": "object"}
+	},
+	"required": ["path", "outpath", "features", "skip existing",
+		"stations"]
+}
