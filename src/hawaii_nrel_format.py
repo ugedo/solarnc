@@ -32,7 +32,17 @@ sensor_data = pd.DataFrame({
         }, index = ["latitude", "longitude"])
 
 def parse_options():
-    usage_str = "usage: %prog -p data_directory_path -o output path"
+    usage_str = '''usage: %prog -p data_directory_path -o output path
+
+    It reads al the txt files from the data_directory_path, were one file per
+    day is expected, with the samples of each NREL station for that day. It
+    writes one output file per day in the output path with the formated data.
+
+    The outputs are csv files, where the first column is in datetime localized
+    format (sample instant), and the rest of the columns contain the GHI values,
+    each column representing one of the NREL stations.
+    '''
+
     parser = optparse.OptionParser(usage_str)
     parser.add_option("-p", "--path", dest="path", type="string",
             help="path to the raw data directory")
