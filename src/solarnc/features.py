@@ -1,4 +1,5 @@
 import pysolar as psol
+import mcclear as mc
 import math
 
 def csm_haurwitz(df, stations):
@@ -25,7 +26,15 @@ def csm_haurwitz(df, stations):
         header = 'GHIn_{} {}'.format("haurwitz", sta)
         df[header] = ghi_rel
 
-
+def csm_mcclear(df, stations, mcpath):
+    stalist = list(stations.keys())
+    for sta in stalist:
+        m = mc.McClear('{}/{}_mcclear_data.csv'.format(mcpath, sta))
+        csm_fun = lambda x: m.get_irradiance(x)
+        csm = df['datetime'].apply(csm_fun)
+        ghi_rel = df['GHI {}'.format(sta)] / csm
+        header = 'GHIn_{} {}'.format("mcclear", sta)
+        df[header] = ghi_rel
 
 def csm_page(df, stations):
     # page clear sky model
