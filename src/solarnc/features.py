@@ -1,12 +1,12 @@
 import pysolar as psol
-import mcclear as mc
+from . import mcclear as mc
 import math
 
 def csm_haurwitz(df, stations):
     # Haurwitz clear sky model
     def __csm_haurwitz(dtime, latitude, longitude):
         altitude = psol.solar.get_altitude(latitude, longitude, dtime)
-		ghi_csm = 1098 * math.sin(math.radians(altitude)) * math.exp(-0.057 / (math.sin(math.radians(altitude))))
+        ghi_csm = 1098 * math.sin(math.radians(altitude)) * math.exp(-0.057 / (math.sin(math.radians(altitude))))
         return ghi_csm
 
     stalist = list(stations.keys())
