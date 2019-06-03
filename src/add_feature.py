@@ -13,7 +13,7 @@ from solarnc import utils as utils
 config_keys = ['path', 'outpath', 'skip existing', 'function', 'stations']
 
 def parse_options():
-    usage_str = "usage: %prog -c json_config_file"
+    usage_str = "usage: %prog -c json_config_file [-l|--logical]"
     parser = optparse.OptionParser(usage_str)
     parser.add_option("-c", "--config", dest="config", type="string",
             help="path to the json file with the configuration parameters")
