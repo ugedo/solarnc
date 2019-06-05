@@ -3,7 +3,7 @@
 	"outpath": "out_test/",
 	"skip existing": true,
 	"features": [
-		{"function": "csm_page"}
+		{"function": "csm_mcclear", "args": ["/home/christian/proyectos/Solar/solarnc/mcclear_data"]}
 	],
     "stations": {
         "AP1": {
