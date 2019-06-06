@@ -11,6 +11,8 @@ data_columns = ["Seconds", "Year", "DOY", "HST", "GHI DH3", "GHI DH4",
 	"Global Tilt DH1", "GHI AP6", "Global Tilt AP6", "GHI AP1", "GHI AP3",
 	"GHI AP5", "GHI AP4", "GHI AP7", "GHI DH6", "GHI DH7", "GHI DH8"]
 
+drop_columns = ["GHI AP3"]
+
 sensor_data = pd.DataFrame({
 	"AP1": [21.31276, -158.08389],
 	"AP3": [21.31281, -158.08163],
@@ -80,37 +82,72 @@ def get_datetime_series(df):
     # HST is the name for the hawaii time zone
     return time_df.dt.tz_localize('HST')
 
+def save_file(data, path, day):
+    outfile = "{}/{}.csv".format(path, day)
+    data.to_csv(outfile, header = True, index = False)
+
+def drop_failing_stations(df, stations_ghi):
+    df.drop(columns = drop_columns, inplace = True)
+    for col in drop_columns:
+        stations_ghi.remove(col)
+
+def filter_hours(df):
+    drop_rows = (df['HST'] < 730) | (df['HST'] > 1730)
+    df.drop(df[drop_rows].index, inplace = True)
+
+def filter_negatives(df, stations_ghi):
+    reject = False
+    for sta in stations_ghi:
+        neg_values = (df[sta] < 0.0).sum()
+        #print('neg_values: {}'.format(neg_values))
+        if neg_values < 0.1 * df.shape[0]:
+            df.loc[df[sta] < 0, sta] = 0
+        else:
+            reject = True
+    return reject
+
 def format_data(infile, outpath):
     stations = sensor_data.columns
     stations_ghi = ["GHI {}".format(x) for x in stations]
 
     base = os.path.basename(infile)
     day = os.path.splitext(base)[0]
-    outfile = "{}/{}.csv".format(outpath, day)
-
     df = pd.read_csv(infile, header = None, names = data_columns)
+
+    drop_failing_stations(df, stations_ghi)
+
+    filter_hours(df)
+
     df = df.round({s: 4 for s in stations_ghi})
     time = get_datetime_series(df[["Seconds", "Year", "DOY", "HST"]])
-
     data = pd.DataFrame({'datetime': time})
     data = pd.concat([data, df[stations_ghi]], axis = 1)
-    data.to_csv(outfile, header = True, index = False)
+
+    if filter_negatives(df, stations_ghi):
+        outpath = '{}_reject'.format(options.outpath)
+    save_file(data, outpath, day)
 
 def format_data_unpack(arg):
     format_data(*arg)
 
 if __name__=="__main__":
     options, args = parse_options()
-
     infiles = get_input_files(options.path)
+    rejected_files = {}
 
     if not os.path.exists(options.outpath):
         os.makedirs(options.outpath)
 
+    outpath_reject = '{}_reject'.format(options.outpath)
+    if not os.path.exists(outpath_reject):
+        os.makedirs(outpath_reject)
+
+    # comment this for debug
     num_cores = mp.cpu_count()
     with mp.Pool(num_cores) as p:
         args = [(inf, options.outpath) for inf in infiles]
         list(tqdm(p.imap(format_data_unpack, args), total = len(infiles)))
 
-
-
+    # uncoment this for debug
+    #for inf in infiles:
+    #    format_data(inf, options.outpath)
