@@ -5,7 +5,6 @@ import datetime as dt
 import optparse
 import os
 import multiprocessing as mp
-from tqdm import tqdm
 
 # original columns in the file
 data_columns = ["Seconds", "Year", "DOY", "HST",
@@ -29,28 +28,29 @@ data_columns = ["Seconds", "Year", "DOY", "HST",
         "GHI DH7",
         "GHI DH8"]
 
-# Dict with (latitude,longitud) tuples
-sensor_data = {
-	"DH3": (21.31236, -158.08463),
-	"DH4": (21.31303, -158.08505),
-	"DH5": (21.31357, -158.08424),
-	"DH10": (21.31183, -158.08554),
-	"DH11": (21.31042, -158.0853),
-	"DH9": (21.31268, -158.08688),
-	"DH2": (21.31451, -158.08534),
-	"DH1": (21.31533, -158.087),
-	"AP6": (21.30812, -158.07935),
-	"AP1": (21.31276, -158.08389),
-	"AP3": (21.31281, -158.08163),
-	"AP5": (21.30983, -158.08249),
-	"AP4": (21.31141, -158.07947),
-	"AP7": (21.31478, -158.07785),
-	"DH6": (21.31179, -158.08678),
-	"DH7": (21.31418, -158.08685),
-	"DH8": (21.31034, -158.08675)}
+## Dict with (latitude,longitud) tuples
+#sensor_data = {
+#	"DH3": (21.31236, -158.08463),
+#	"DH4": (21.31303, -158.08505),
+#	"DH5": (21.31357, -158.08424),
+#	"DH10": (21.31183, -158.08554),
+#	"DH11": (21.31042, -158.0853),
+#	"DH9": (21.31268, -158.08688),
+#	"DH2": (21.31451, -158.08534),
+#	"DH1": (21.31533, -158.087),
+#	"AP6": (21.30812, -158.07935),
+#	"AP1": (21.31276, -158.08389),
+#	"AP3": (21.31281, -158.08163),
+#	"AP5": (21.30983, -158.08249),
+#	"AP4": (21.31141, -158.07947),
+#	"AP7": (21.31478, -158.07785),
+#	"DH6": (21.31179, -158.08678),
+#	"DH7": (21.31418, -158.08685),
+#	"DH8": (21.31034, -158.08675)}
 
 def parse_options():
-    usage_str = '''usage: %prog -p data_directory_path -o output path
+    usage_str = \
+''' %prog -p data_directory_path -o output path [-c num_cores]
 
     It reads al the txt files from the data_directory_path, were one file per
     day is expected, with the samples of each NREL station for that day. It
@@ -62,10 +62,16 @@ def parse_options():
     '''
 
     parser = optparse.OptionParser(usage_str)
-    parser.add_option("-p", "--path", dest="path", type="string",
+    parser.add_option("-p", dest="path", type="string",
             help="path to the raw data directory")
-    parser.add_option("-o", "--out", dest="outpath", type="string",
+    parser.add_option("-o", dest="outpath", type="string",
             help="output directory")
+    parser.add_option("-c", dest="ncores", type="int",
+            help="number of cores to use", default = mp.cpu_count())
+    parser.add_option("-s", dest="start", type="int",
+            help="start time %HH%MM", default = 730)
+    parser.add_option("-e", dest="end", type="int",
+            help="end time %HH%MM", default = 1730)
 
     options, args  = parser.parse_args()
 
@@ -74,6 +80,9 @@ def parse_options():
 
     if not options.outpath:
         parser.error("missing outpath")
+
+    options.path = options.path.rstrip("/")
+    options.outpath = options.outpath.rstrip("/")
 
     return (options, args)
 
@@ -86,34 +95,38 @@ def get_input_files(path):
     return files
 
 
-def format_data(infile, outpath, ghi_index, header):
+def format_data(infile, common):
+    outpath, ghi_index, header, start, end, outpath_reject  = common
+
     base = os.path.basename(infile)
     day = os.path.splitext(base)[0]
     numlines = 0
     nneg = [0] * 16
     ifile = open(infile, 'r')
-    outfile = "{}/{}.csv".format(outpath, day)
-    ofile = open(outfile, 'w')
+    ofilename = "{}/{}.csv".format(outpath, day)
+    ofile = open(ofilename, 'w')
     ofile.write(header)
 
     reader = csv.reader(ifile)
     for f in reader:
         numlines += 1
-        if int(f[3]) < 730 or int(f[3]) > 1730:
+        if int(f[3]) < start or int(f[3]) > end:
             continue
         hh = int(f[3][:-2])
         mm = int(f[3][-2:])
         dtime = dt.datetime(int(f[1]), 1, 1,hh,mm,int(f[0])) + dt.timedelta(int(f[2]) - 1)
         outline = "{}-10:00,".format(dtime)
         ghis = [float(f[g]) for g in ghi_index]
-        nneg = list(map(lambda x: x + 1 if x < 0.0 else x,nneg))
+        nneg = [nneg[i] + 1 if ghis[i] < 0.0 else nneg[i] for i in range(16)]
         outline += ','.join(["{}".format(g) for g in ghis])
         ofile.write(outline + '\n')
 
     ifile.close()
     ofile.close()
     if any(x >= 0.1*numlines for x in nneg):
-        os.rename(outfile, "{}_reject/{}.csv".format(outpath, day))
+        if not os.path.exists(outpath_reject):
+            os.makedirs(outpath_reject)
+        os.rename(ofilename, "{}/{}.csv".format(outpath_reject, day))
 
 def format_data_unpack(arg):
     format_data(*arg)
@@ -135,22 +148,19 @@ def main():
     if not os.path.exists(options.outpath):
         os.makedirs(options.outpath)
 
-    outpath_reject = '{}_reject'.format(options.outpath)
-    if not os.path.exists(outpath_reject):
-        os.makedirs(outpath_reject)
-
+    outpath_reject = '{}/reject'.format(options.outpath)
     ghi_index = get_ghi_index()
     header = get_header(ghi_index)
-
-    # comment this for debug
-    num_cores = mp.cpu_count()
-    with mp.Pool(num_cores) as p:
-        args = [(inf, options.outpath, ghi_index, header) for inf in infiles]
-        list(tqdm(p.imap(format_data_unpack, args), total = len(infiles)))
-
-    # uncoment this for debug
-    #for inf in infiles:
-    #    format_data(inf, options.outpath, ghi_index, header)
+    p = mp.Pool(options.ncores)
+    common = (options.outpath, ghi_index, header, options.start, options.end, \
+            outpath_reject)
+    arglist = [(inf, common) for inf in infiles]
+    njobs = len(infiles)
+    j = 0;
+    for x in p.imap(format_data_unpack, arglist):
+        j += 1
+        print("\r{}/{}".format(j,njobs), end='')
+    print("")
 
 if __name__=="__main__":
     main()
