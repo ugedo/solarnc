@@ -50,7 +50,8 @@ data_columns = ["Seconds", "Year", "DOY", "HST",
 
 def parse_options():
     usage_str = \
-''' %prog -p data_directory_path -o output path [-c num_cores]
+''' %prog -p data_directory_path -o output path [-j num_jobs] [-s start_time]
+                        [-e end_time]
 
     It reads al the txt files from the data_directory_path, were one file per
     day is expected, with the samples of each NREL station for that day. It
@@ -66,8 +67,8 @@ def parse_options():
             help="path to the raw data directory")
     parser.add_option("-o", dest="outpath", type="string",
             help="output directory")
-    parser.add_option("-c", dest="ncores", type="int",
-            help="number of cores to use", default = mp.cpu_count())
+    parser.add_option("-j", dest="npjobs", type="int",
+            help="number of parallel jobs to use", default = mp.cpu_count())
     parser.add_option("-s", dest="start", type="int",
             help="start time %HH%MM", default = 730)
     parser.add_option("-e", dest="end", type="int",
@@ -151,7 +152,7 @@ def main():
     outpath_reject = '{}/reject'.format(options.outpath)
     ghi_index = get_ghi_index()
     header = get_header(ghi_index)
-    p = mp.Pool(options.ncores)
+    p = mp.Pool(options.npjobs)
     common = (options.outpath, ghi_index, header, options.start, options.end, \
             outpath_reject)
     arglist = [(inf, common) for inf in infiles]

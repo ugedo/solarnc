@@ -1,25 +1,21 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import pandas as pd
 import optparse
 import os
+import glob
 import multiprocessing as mp
-from tqdm import tqdm
-import psutil
 import jsonschema as jsch
 from solarnc import features as sncf
 from solarnc import utils as utils
 
-config_keys = ['path', 'outpath', 'skip existing', 'function', 'stations']
-
 def parse_options():
-    usage_str = "usage: %prog -c json_config_file [-l|--logical]"
+    usage_str = "usage: %prog -c json_config_file [-j num_jobs]"
     parser = optparse.OptionParser(usage_str)
-    parser.add_option("-c", "--config", dest="config", type="string",
+    parser.add_option("-c", dest="config", type="string",
             help="path to the json file with the configuration parameters")
-    parser.add_option("-l", "--logical", dest="logical", action="store_true",
-            default = False,
-            help="parallelize also using logical cpus (hyperthreading)")
+    parser.add_option("-j", dest="npjobs", type="int",
+            help="number of parallel jobs to use", default = mp.cpu_count())
 
     options, args  = parser.parse_args()
 
@@ -28,13 +24,11 @@ def parse_options():
 
     return (options, args)
 
-def get_input_files(path, outpath, skip_existing):
-    files = utils.get_csv_files_list(path)
-    if skip_existing:
-        for f in utils.get_csv_files_list(outpath):
-            if f in files:
-                files.remove(f)
-    return files
+def skip_existing_files(l,path,ext = "csv"):
+    f = glob.glob("{}/*.{}".format(path, ext))
+    skipl = list(map(os.path.basename, f))
+    newl = [x for x in l if os.path.basename(x) not in skipl]
+    return (newl, skipl)
 
 def load_config(conf_file):
     config = utils.load_json(conf_file)
@@ -45,7 +39,7 @@ def load_config(conf_file):
     jsch.validate(config, schema)
     return config
 
-def add_new_feature(infile, stations, fetures):
+def add_new_features(infile, stations, features, outpath):
     df = utils.read_solarnc_csv(infile)
     for f in features:
         try:
@@ -61,14 +55,13 @@ def add_new_feature(infile, stations, fetures):
 
     base = os.path.basename(infile)
     day = os.path.splitext(base)[0]
-    outfile = "{}/{}.csv".format(config['outpath'], day)
+    outfile = "{}/{}.csv".format(outpath, day)
     utils.save_solarnc_csv(df, outfile)
 
 def print_stations(stations):
     print("Considering the following stations: ")
-    sta_list = list(stations.keys())
-    for sta in sta_list:
-        print("\t{}".format(sta))
+    for sta in stations:
+        print(sta)
 
 def print_features(features):
     print("Computing the following features:")
@@ -79,10 +72,10 @@ def print_features(features):
             msg = '\t{}'.format(f['function'])
         print(msg)
 
-def add_new_feature_unpack(arg):
-    add_new_feature(*arg)
+def add_new_features_unpack(arg):
+    add_new_features(*arg)
 
-if __name__ == "__main__":
+def main():
     options, args = parse_options()
 
     config = load_config(options.config)
@@ -91,21 +84,29 @@ if __name__ == "__main__":
     print_stations(stations)
     features = config['features']
     print_features(features)
-
     if not os.path.exists(config['outpath']):
         os.makedirs(config['outpath'])
 
-    infiles = get_input_files(config['path'], config['outpath'],
-            config['skip existing'])
+    infiles  = glob.glob("{}/*.csv".format(config['path']))
+    if config['skip existing']:
+        infiles, skipped = skip_existing_files(infiles, config['outpath'])
+        print("Skipped files:")
+        print(skipped)
 
-    if options.logical:
-        num_cores = mp.cpu_count() # with hyperthreading as cpus
-    else:
-        num_cores = psutil.cpu_count(logical = False)
+    print("Input files from: {}".format(config['path']))
+    print(infiles)
+    outpath = config['outpath']
+    print("Output files to: {}".format(outpath))
 
-    with mp.Pool(num_cores) as p:
-        args = [(infile, stations, features) for infile in infiles]
-        for _ in tqdm(p.imap_unordered(add_new_feature_unpack, args),
-                total = len(infiles)):
-            pass
+    njobs = len(infiles)
+    p = mp.Pool(options.npjobs)
+    args = [(infile, stations, features, outpath) for infile in infiles]
+    j = 0;
+    print("\r{}/{}".format(j,njobs), end='')
+    for x in p.imap_unordered(add_new_features_unpack, args):
+        j += 1
+        print("\r{}/{}".format(j,njobs), end='')
+    print("")
 
+if __name__ == "__main__":
+    main()

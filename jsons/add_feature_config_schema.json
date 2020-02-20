@@ -10,6 +10,16 @@
 				"args": {"type": "array"}
 			},
 			"required": ["function"]
+		},
+		"station": {
+			"type": "object",
+			"properties": {
+				"name": {"type": "string"},
+				"latitude": {"type": "number"},
+				"longitude": {"type": "number"},
+				"tzname": {"type": "string"}
+			},
+			"required": ["name","latitude", "longitude"]
 		}
 	},
 	"properties": {
@@ -23,7 +33,12 @@
 			}
 		},
 		"skip existing": {"type": "boolean"},
-		"stations": {"type": "object"}
+		"stations": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/station"
+			}
+		}
 	},
 	"required": ["path", "outpath", "features", "skip existing",
 		"stations"]

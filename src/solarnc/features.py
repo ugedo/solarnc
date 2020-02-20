@@ -1,30 +1,18 @@
-import pysolar as psol
+#import pysolar as psol
+#import pvlib
+from pvlib import clearsky
+from pvlib.location import Location
+
 from . import mcclear as mc
 import math
 
-def csm_haurwitz(df, stations):
-    # Haurwitz clear sky model
-    def __csm_haurwitz(dtime, latitude, longitude):
-        altitude = psol.solar.get_altitude(latitude, longitude, dtime)
-        ghi_csm = 1098 * math.sin(math.radians(altitude)) * math.exp(-0.057 / (math.sin(math.radians(altitude))))
-        return ghi_csm
+# pvlib provides: ‘ineichen’, ‘haurwitz’, ‘simplified_solis'
+def csm_pvlib(df, stations, model, itype):
+    for sta in stations:
+        loc = Location(sta["latitude"], sta["longitude"])
+        name = "{} {} {}".format(model, itype, sta["name"])
+        df[name] = loc.get_clearsky(df.index, model = model)[itype]
 
-    stalist = list(stations.keys())
-    for sta in stalist:
-        if "latitude" not in stations[sta]:
-            raise ValueError('No latitude for station {}'.format(sta))
-
-        if "longitude" not in stations[sta]:
-            raise ValueError('No longitude for station {}'.format(sta))
-
-        latitude = stations[sta]["latitude"]
-        longitude = stations[sta]["longitude"]
-
-        csm_fun = lambda x: __csm_haurwitz(x, latitude, longitude)
-        csm = df['datetime'].apply(csm_fun)
-        ghi_rel = df['GHI {}'.format(sta)] / csm
-        header = 'GHIn_{} {}'.format("haurwitz", sta)
-        df[header] = ghi_rel
 
 def csm_mcclear(df, stations, mcpath):
     stalist = list(stations.keys())

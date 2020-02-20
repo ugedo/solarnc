@@ -17,11 +17,24 @@ def get_csv_files_list(path):
 
 def read_solarnc_csv(infile):
     df = pd.read_csv(infile, index_col = None)
-    # FIXME: using pd.to_datetime is faster (20%) but timezone info is lost
-    # I do not now any better solution than using the iso8601 parse_date parser
-    #df['datetime'] = pd.to_datetime(df['datetime'])
     df['datetime'] = df['datetime'].apply(iso8601.parse_date)
+    df.set_index('datetime',inplace = True)
     return df
 
 def save_solarnc_csv(df, outfile):
-    df.to_csv(outfile, header = True, index = False)
+    df.to_csv(outfile, header = True, index = True)
+
+#def sample_audit(time_data):
+
+
+def get_consecutive_falses(ser):
+    aux = ser | (ser != ser.shift())
+    groups = ser.groupby(aux.cumsum()).transform('count')
+    groups[ser] = 0
+    return groups
+
+def ghi_audit(df):
+    ghi_df = df.filter(regex=('GHI *'))
+    return ghi_df.apply(lambda x: get_consecutive_falses(x >= 0).max())
+
+
