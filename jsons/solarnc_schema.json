@@ -1,0 +1,62 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"title": "A json schema for the solarnc project",
+	"type": "object",
+	"definitions": {
+		"function": {
+			"type": "object",
+			"properties": {
+				"name": {"type": "string"},
+				"skip existing": {"type": "boolean"},
+				"module": {"type": "string"},
+				"fname": {"type": "string"},
+				"args": {"type": "array"}
+			},
+			"required": ["name","skip existing","module","fname"]
+		},
+		"station": {
+			"type": "object",
+			"properties": {
+				"name": {"type": "string"},
+				"latitude": {"type": "number"},
+				"longitude": {"type": "number"}
+			},
+			"required": ["name","latitude", "longitude"]
+		}
+	},
+	"properties": {
+		"timezone": {"type": "string"},
+		"stations": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/station",
+				"minItems": 1
+			}
+		},
+		"format": {
+			"type": "object",
+			"properties": {
+				"path": {"type": "string"},
+				"outpath": {"type": "string"}
+			},
+			"required": ["path", "outpath"]
+		},
+		"extend": {
+			"type": "object",
+			"properties": {
+				"path": {"type": "string"},
+				"outpath": {"type": "string"},
+				"functions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/function",
+						"minItems": 1
+					}
+				},
+				"skip existing files": {"type": "boolean"}
+			},
+			"required": ["path", "outpath","functions","skip existing files", "skip existing variables"]
+		}
+	},
+	"required": ["timezone", "stations", "format"]
+}

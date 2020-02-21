@@ -116,7 +116,7 @@ def format_data(infile, common):
         hh = int(f[3][:-2])
         mm = int(f[3][-2:])
         dtime = dt.datetime(int(f[1]), 1, 1,hh,mm,int(f[0])) + dt.timedelta(int(f[2]) - 1)
-        outline = "{},".format(dtime)
+        outline = "{}-10:00,".format(dtime)
         ghis = [float(f[g]) for g in ghi_index]
         nneg = [nneg[i] + 1 if ghis[i] < 0.0 else nneg[i] for i in range(16)]
         outline += ','.join(["{}".format(g) for g in ghis])

@@ -1,13 +1,5 @@
 {
-	"path": "out/",
-	"outpath": "out_test/",
 	"timezone": "Pacific/Honolulu",
-	"skip existing": false,
-	"features": [
-		{"function": "csm_pvlib", "args": ["haurwitz","ghi"]},
-		{"function": "csm_pvlib", "args": ["ineichen","ghi"]},
-		{"function": "csm_pvlib", "args": ["simplified_solis","ghi"]}
-	],
     "stations": [
         {
 			"name": "AP1",
@@ -94,5 +86,38 @@
             "latitude": 21.31042,
             "longitude": -158.0853
         }
-	]
+	],
+	"format": {
+		"path": "infiles/",
+		"outpath": "out_format/"
+	},
+	"extend": {
+		"path": "out_format/",
+		"outpath": "out_exted/",
+		"functions": [
+			{
+				"name": "haurwitz ghi",
+				"skip existing": false,
+				"module": "solarnc",
+				"fname": "csm_pvlib",
+				"args": ["haurwitz","ghi"]
+			},
+			{
+				"name": "ineichen ghi",
+				"skip existing": false,
+				"module": "solarnc",
+				"fname": "csm_pvlib",
+				"args": ["ineichen","ghi"]
+			},
+			{
+				"name": "simplified_solis ghi",
+				"skip existing": false,
+				"module": "solarnc",
+				"fname": "csm_pvlib",
+				"args": ["simplified_solis","ghi"]
+			}
+		],
+		"skip existing files": false,
+		"skip existing variables": false
+	}
 }
