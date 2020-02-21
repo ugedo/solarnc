@@ -16,9 +16,7 @@ def get_csv_files_list(path):
     return files
 
 def read_solarnc_csv(infile):
-    df = pd.read_csv(infile, index_col = None)
-    df['datetime'] = df['datetime'].apply(iso8601.parse_date)
-    df.set_index('datetime',inplace = True)
+    df = pd.read_csv(infile, index_col = "datetime", parse_dates=True)
     return df
 
 def save_solarnc_csv(df, outfile):
