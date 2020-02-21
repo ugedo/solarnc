@@ -1,6 +1,7 @@
 {
 	"path": "out/",
 	"outpath": "out_test/",
+	"timezone": "Pacific/Honolulu",
 	"skip existing": false,
 	"features": [
 		{"function": "csm_pvlib", "args": ["haurwitz","ghi"]},

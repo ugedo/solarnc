@@ -39,8 +39,8 @@ def load_config(conf_file):
     jsch.validate(config, schema)
     return config
 
-def add_new_features(infile, stations, features, outpath):
-    df = utils.read_solarnc_csv(infile)
+def add_new_features(infile, stations, timezone, features, outpath):
+    df = utils.read_solarnc_csv(infile, timezone)
     for f in features:
         try:
             ffun = getattr(sncf, f['function'])
@@ -95,18 +95,27 @@ def main():
 
     print("Input files from: {}".format(config['path']))
     print(infiles)
+    timezone = config['timezone']
+    print("Timezone is: {}".format(timezone))
     outpath = config['outpath']
     print("Output files to: {}".format(outpath))
 
     njobs = len(infiles)
-    p = mp.Pool(options.npjobs)
-    args = [(infile, stations, features, outpath) for infile in infiles]
+    args = [(infile, stations, timezone, features, outpath) for infile in infiles]
     j = 0;
     print("\r{}/{}".format(j,njobs), end='')
-    for x in p.imap_unordered(add_new_features_unpack, args):
-        j += 1
-        print("\r{}/{}".format(j,njobs), end='')
+    if options.npjobs > 1:
+        p = mp.Pool(options.npjobs)
+        for x in p.imap_unordered(add_new_features_unpack, args):
+            j += 1
+            print("\r{}/{}".format(j,njobs), end='')
+    else:
+        for argtup in args:
+            add_new_features_unpack(argtup)
+            j += 1
+            print("\r{}/{}".format(j,njobs), end='')
     print("")
+
 
 if __name__ == "__main__":
     main()

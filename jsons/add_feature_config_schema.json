@@ -25,6 +25,7 @@
 	"properties": {
 		"path": {"type": "string"},
 		"outpath": {"type": "string"},
+		"timezone": {"type": "string"},
 		"features": {
 			"type": "array",
 			"items": {
@@ -40,6 +41,6 @@
 			}
 		}
 	},
-	"required": ["path", "outpath", "features", "skip existing",
+	"required": ["path", "outpath", "timezone", "features", "skip existing",
 		"stations"]
 }

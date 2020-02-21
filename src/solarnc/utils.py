@@ -15,8 +15,9 @@ def get_csv_files_list(path):
             files.append("{}/{}".format(path, f))
     return files
 
-def read_solarnc_csv(infile):
+def read_solarnc_csv(infile, tzone):
     df = pd.read_csv(infile, index_col = "datetime", parse_dates=True)
+    df.index = df.index.tz_localize('UTC').tz_convert(tzone)
     return df
 
 def save_solarnc_csv(df, outfile):
