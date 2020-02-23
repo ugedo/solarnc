@@ -14,11 +14,11 @@ def parse_options():
             help="number of parallel jobs to use", default = mp.cpu_count())
 
     options, args  = parser.parse_args()
-    if not options.config: parser.error("missing json config file")
+    if not options.config:
+        parser.error("missing json config file")
     return (options, args)
 
-def main():
-    options, args = parse_options()
+def main(options, args):
     config = snc.load_config(options.config)
     print("Correct config format")
 
@@ -48,4 +48,4 @@ def main():
         fun(dtset, fconfig, options.npjobs)
 
 if __name__=="__main__":
-    main()
+    main(*parse_options())

@@ -7,6 +7,7 @@ import glob
 import multiprocessing as mp
 import solarnc as snc
 
+
 def parse_options():
     usage_str = "%prog -c json_config_file [-j num_jobs]"
     parser = optparse.OptionParser(usage_str)
@@ -18,12 +19,6 @@ def parse_options():
     options, args  = parser.parse_args()
     if not options.config: parser.error("missing json config file")
     return (options, args)
-
-def skip_existing_files(l,path,ext = "csv"):
-    f = glob.glob("{}/*.{}".format(path, ext))
-    skipl = list(map(os.path.basename, f))
-    newl = [x for x in l if os.path.basename(x) not in skipl]
-    return (newl, skipl)
 
 def add_new_variables(infile, stations, timezone, functions, outpath):
     df = snc.read_csv(infile, timezone)
@@ -61,9 +56,7 @@ def print_functions(functions):
             msg = '\t{} -> {}'.format(f['fname'],f['name'])
         print(msg)
 
-def main():
-    options, args = parse_options()
-
+def main(options, args):
     config = snc.load_config(options.config)
     if 'extend' not in config:
         print("Error: no extend property in {}".format(options.config))
@@ -103,4 +96,4 @@ def main():
     snc.runjobs(add_new_variables, args, options.npjobs)
 
 if __name__ == "__main__":
-    main()
+    main(*parse_options())
