@@ -52,7 +52,7 @@ def print_stations(stations):
         print(sta)
 
 def print_functions(functions):
-    print("Applying the following functions on the the files:")
+    print("Applying the following functions on the files:")
     for f in functions:
         if 'args' in f:
             msg = '\t{}, with args: {} -> {}'.format(f['fname'], f['args'],\
