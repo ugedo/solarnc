@@ -26,6 +26,7 @@ def add_new_variables(infile, stations, timezone, functions, outpath):
         try:
             module = __import__(f['module'])
             fun = getattr(module, f['fname'])
+            #TODO: check that it is a funtion
         except AttributeError:
             print("Error: could not find function {} in module {}"\
                     .format(f['fname'],f['module']))

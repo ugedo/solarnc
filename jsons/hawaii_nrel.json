@@ -103,7 +103,7 @@
 		"skip existing": false
 	},
 	"extend": {
-		"outpath": "out_exted/",
+		"outpath": "out_extend/",
 		"functions": [
 			{
 				"name": "haurwitz ghi",
@@ -129,5 +129,12 @@
 		],
 		"skip existing files": false,
 		"skip existing variables": false
+	},
+	"split": {
+		"method" : {
+			"name": "random",
+			"args": {"train": 70}
+		},
+		"skip existing": false
 	}
 }

@@ -71,7 +71,22 @@
 				"skip existing files": {"type": "boolean"}
 			},
 			"required": ["outpath","functions","skip existing files", "skip existing variables"]
+		},
+		"split": {
+			"type": "object",
+			"properties": {
+				"method": {
+					"type": "object",
+					"properties": {
+						"name": {"type": "string"},
+						"args": {"type": "object"}
+					},
+					"required": ["name"]
+				},
+				"skip existing": {"type": "boolean"}
+			},
+			"required": ["method", "skip existing"]
 		}
 	},
-	"required": ["dataset", "format"]
+	"required": ["dataset", "format", "split"]
 }

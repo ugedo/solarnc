@@ -1,5 +1,6 @@
 import json
 import os
+import csv
 import pandas as pd
 import jsonschema as jsch
 from pvlib.location import Location
@@ -23,6 +24,17 @@ def read_csv(infile, tzone):
 
 def save_csv(df, outfile):
     df.to_csv(outfile, header = True, index = True)
+
+def save_list(l, fname):
+    with open(fname, 'w') as f:
+        wr = csv.writer(f, quoting=csv.QUOTE_ALL)
+        wr.writerow(l)
+
+def read_list(fname):
+    with open(fname, newline='') as f:
+        reader = csv.reader(f)
+        l = list(reader)
+    return l[0]
 
 # pvlib provides: ‘ineichen’, ‘haurwitz’, ‘simplified_solis'
 def csm_pvlib(df, skip_existing, name, stations, model, itype):
