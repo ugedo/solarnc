@@ -60,7 +60,6 @@
 		"extend": {
 			"type": "object",
 			"properties": {
-				"path": {"type": "string"},
 				"outpath": {"type": "string"},
 				"functions": {
 					"type": "array",
@@ -71,7 +70,7 @@
 				},
 				"skip existing files": {"type": "boolean"}
 			},
-			"required": ["path", "outpath","functions","skip existing files", "skip existing variables"]
+			"required": ["outpath","functions","skip existing files", "skip existing variables"]
 		}
 	},
 	"required": ["dataset", "format"]

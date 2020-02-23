@@ -8,7 +8,7 @@ import multiprocessing as mp
 import solarnc as snc
 
 def parse_options():
-    usage_str = "usage: %prog -c json_config_file [-j num_jobs]"
+    usage_str = "%prog -c json_config_file [-j num_jobs]"
     parser = optparse.OptionParser(usage_str)
     parser.add_option("-c", dest="config", type="string",
             help="path to the json file with the configuration parameters")
@@ -16,10 +16,7 @@ def parse_options():
             help="number of parallel jobs to use", default = mp.cpu_count())
 
     options, args  = parser.parse_args()
-
-    if not options.config:
-        parser.error("missing json config file")
-
+    if not options.config: parser.error("missing json config file")
     return (options, args)
 
 def skip_existing_files(l,path,ext = "csv"):
@@ -49,9 +46,6 @@ def add_new_variables(infile, stations, timezone, functions, outpath):
     outfile = "{}/{}.csv".format(outpath, day)
     snc.save_csv(df, outfile)
 
-def add_new_variables_unpack(arg):
-    add_new_variables(*arg)
-
 def print_stations(stations):
     print("Considering the following stations: ")
     for sta in stations:
@@ -78,12 +72,16 @@ def main():
         extend = config['extend']
         print("Correct config format")
 
-    timezone = config['timezone']
+    dtset = config['dataset']
+    print("Dataset: {}".format(dtset['name']))
+    timezone = dtset['timezone']
     print("Timezone is: {}".format(timezone))
-    stations = config['stations']
+
+    fconfig = config['format']
+    stations = [sta for sta in dtset['stations'] if sta['name'] in fconfig['stations']]
     print_stations(stations)
 
-    path = extend['path']
+    path = fconfig['outpath']
     print("Input files from: {}".format(path))
     infiles  = glob.glob("{}/*.csv".format(path))
     print(infiles)
@@ -101,21 +99,8 @@ def main():
         print("Skipped files:")
         print(skipped)
 
-    njobs = len(infiles)
     args = [(infile, stations, timezone, functions, outpath) for infile in infiles]
-    j = 0;
-    print("\r{}/{}".format(j,njobs), end='')
-    if options.npjobs > 1:
-        p = mp.Pool(options.npjobs)
-        for x in p.imap_unordered(add_new_variables_unpack, args):
-            j += 1
-            print("\r{}/{}".format(j,njobs), end='')
-    else:
-        for argtup in args:
-            add_new_variables_unpack(argtup)
-            j += 1
-            print("\r{}/{}".format(j,njobs), end='')
-    print("")
+    snc.runjobs(add_new_variables, args, options.npjobs)
 
 if __name__ == "__main__":
     main()

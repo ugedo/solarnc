@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import jsonschema as jsch
 from pvlib.location import Location
+import multiprocessing as mp
 
 def load_config(fname):
     with open(fname, 'r') as f:
@@ -32,14 +33,18 @@ def csm_pvlib(df, skip_existing, name, stations, model, itype):
         loc = Location(sta["latitude"], sta["longitude"])
         df[colname] = loc.get_clearsky(df.index, model = model)[itype]
 
+def run_cbk_unpack(tup):
+    cbk, argtup = tup
+    cbk(*argtup)
 
 def runjobs(cbk, arglist, npjobs):
     nj = len(arglist)
+    l = list(zip([cbk] * nj, arglist))
     j = 0;
     print("\rDone: {}/{}".format(j,nj), end='')
     if npjobs > 1:
         p = mp.Pool(npjobs)
-        for x in p.imap(lambda argtup: cbk(*argtup), arglist):
+        for x in p.imap(run_cbk_unpack, l):
             j += 1
             print("\rDone: {}/{}".format(j,nj), end='')
     else:
@@ -48,5 +53,6 @@ def runjobs(cbk, arglist, npjobs):
             j += 1
             print("\rDone: {}/{}".format(j,nj), end='')
     print("")
+
 
 
