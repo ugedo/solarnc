@@ -31,3 +31,22 @@ def csm_pvlib(df, skip_existing, name, stations, model, itype):
             continue
         loc = Location(sta["latitude"], sta["longitude"])
         df[colname] = loc.get_clearsky(df.index, model = model)[itype]
+
+
+def runjobs(cbk, arglist, npjobs):
+    nj = len(arglist)
+    j = 0;
+    print("\rDone: {}/{}".format(j,nj), end='')
+    if npjobs > 1:
+        p = mp.Pool(npjobs)
+        for x in p.imap(lambda argtup: cbk(*argtup), arglist):
+            j += 1
+            print("\rDone: {}/{}".format(j,nj), end='')
+    else:
+        for argtup in arglist:
+            cbk(*argtup)
+            j += 1
+            print("\rDone: {}/{}".format(j,nj), end='')
+    print("")
+
+

@@ -25,21 +25,37 @@
 		}
 	},
 	"properties": {
-		"timezone": {"type": "string"},
-		"stations": {
-			"type": "array",
-			"items": {
-				"$ref": "#/definitions/station",
-				"minItems": 1
-			}
+		"dataset": {
+			"type": "object",
+			"properties": {
+				"name": {"type": "string"},
+				"path": {"type": "string"},
+				"timezone": {"type": "string"},
+				"stations": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/station",
+						"minItems": 1
+					}
+				}
+			},
+			"required": ["name","path","timezone","stations"]
 		},
 		"format": {
 			"type": "object",
 			"properties": {
-				"path": {"type": "string"},
-				"outpath": {"type": "string"}
+				"outpath": {"type": "string"},
+				"stations": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"minItems": 1
+					}
+				},
+				"module": {"type": "string"},
+				"fname": {"type": "string"}
 			},
-			"required": ["path", "outpath"]
+			"required": ["outpath","stations","module","fname"]
 		},
 		"extend": {
 			"type": "object",
@@ -58,5 +74,5 @@
 			"required": ["path", "outpath","functions","skip existing files", "skip existing variables"]
 		}
 	},
-	"required": ["timezone", "stations", "format"]
+	"required": ["dataset", "format"]
 }
