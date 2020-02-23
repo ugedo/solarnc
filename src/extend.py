@@ -99,7 +99,7 @@ def main():
         print("Skipped files:")
         print(skipped)
 
-    args = [(infile, stations, timezone, functions, outpath) for infile in infiles]
+    args = [(f, stations, timezone, functions, outpath) for f in infiles]
     snc.runjobs(add_new_variables, args, options.npjobs)
 
 if __name__ == "__main__":
