@@ -103,7 +103,6 @@
 		"skip existing": false
 	},
 	"extend": {
-		"path": "out_format/",
 		"outpath": "out_exted/",
 		"functions": [
 			{
