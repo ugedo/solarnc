@@ -22,7 +22,7 @@ def split_random(infiles, outpath, args):
         print("Error: random methods requires train arg")
         os._exit(-1)
 
-    percent = args['train']
+    percent = float(args['train'])
     if percent < 1 or percent > 99:
         print("Error: train shoyld be in the range 1-99")
         os._exit(-1)
