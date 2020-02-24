@@ -126,24 +126,7 @@
 				"skip existing": false,
 				"module": "solarnc",
 				"fname": "csm_pvlib",
-				"args": ["haurwitz","ghi",4]
-			},
-			{
-				"skip existing": false,
-				"module": "solarnc",
-				"fname": "csm_pvlib",
-				"args": ["ineichen","ghi",4]
-			},
-			{
-				"skip existing": false,
-				"module": "solarnc",
-				"fname": "csm_pvlib",
-				"args": ["simplified_solis","ghi",4]
-			},
-			{
-				"skip existing": false,
-				"module": "solarnc",
-				"fname": "solar_position"
+				"args": [["haurwitz","ineichen","simplified_solis"],true]
 			}
 		],
 		"skip existing files": false,

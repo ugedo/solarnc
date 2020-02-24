@@ -2,11 +2,13 @@ import json
 import os
 import csv
 import pandas as pd
+import numpy as np
 import jsonschema as jsch
 #import pvlib
 from pvlib.location import Location
+from pvlib import clearsky
+import pvlib
 import multiprocessing as mp
-#import numpy as np
 
 def load_config(fname):
     with open(fname, 'r') as f:
@@ -39,21 +41,55 @@ def read_list(fname):
     return l[0]
 
 # pvlib provides: ‘ineichen’, ‘haurwitz’, ‘simplified_solis'
-def csm_pvlib(df, skip_existing, stations, model, itype, decimals):
+def csm_pvlib(df, skip_existing, stations, models, position):
     for sta in stations:
         staname = sta['name']
-        ghicol = "GHI {}".format(staname)
-        csmcol = "{}_ghi {}".format(model, staname)
-        kcol = "K_{} {}".format(model, staname)
-        if skip_existing and csmcol in df.columns:
-            continue
         latitude = sta["latitude"]
         longitude = sta["longitude"]
         altitude = sta["MASL"] if "MASL" in sta else 0
-        loc = Location(latitude, longitude, df.index.tz.zone, altitude)
-        df[csmcol] = round(loc.get_clearsky(df.index, model = model)[itype]\
-                    , decimals)
-        df[kcol] = round(df[ghicol]/df[csmcol], decimals)
+        ecol = 'elevation {}'.format(staname)
+        acol = 'azimuth {}'.format(staname)
+
+        solpos = pvlib.solarposition.get_solarposition(df.index, latitude,\
+                longitude)
+        apparent_elevation = solpos['apparent_elevation']
+        apparent_zenith = solpos['apparent_zenith']
+
+        if position and ecol not in df.columns:
+            df[ecol] = apparent_elevation
+            df[acol] = solpos['azimuth']
+
+        if 'ineichen' in models or 'solis' in models \
+                or 'simplified_solis' in models:
+            pressure = pvlib.atmosphere.alt2pres(altitude)
+            dni_extra = pvlib.irradiance.get_extra_radiation(df.index)
+
+        for model in models:
+            ghicol = "GHI {}".format(staname)
+            csmcol = "{}_ghi {}".format(model, staname)
+            kcol = "K_{} {}".format(model, staname)
+            if skip_existing and csmcol in df.columns:
+                continue
+            if model == 'ineichen':
+                airmass = pvlib.atmosphere.get_relative_airmass(apparent_zenith)
+                airmass = pvlib.atmosphere.get_absolute_airmass(airmass, \
+                        pressure)
+                linke_turbidity = pvlib.clearsky.lookup_linke_turbidity(\
+                        df.index, latitude, longitude)
+                df[csmcol] = clearsky.ineichen(apparent_zenith, airmass,\
+                        linke_turbidity, altitude, dni_extra)['ghi']
+            elif model == 'solis' or model == 'simplified_solis':
+                aod700 = 0.1
+                precipitable_water = 1
+                df[csmcol] = clearsky.simplified_solis(apparent_elevation,\
+                        aod700, precipitable_water, pressure, dni_extra)['ghi']
+            elif model == 'haurwitz':
+                sin_elevation = np.sin(np.radians(apparent_elevation))
+                df[csmcol] = 1098 * sin_elevation * np.exp(-0.057/sin_elevation)
+            else:
+                print("Error: {} model not supportd")
+                raise ValueError
+            df[kcol] = df[ghicol]/df[csmcol]
 
 def solar_position(df, skip_existing, stations):
     for sta in stations:
