@@ -6,13 +6,12 @@
 		"function": {
 			"type": "object",
 			"properties": {
-				"name": {"type": "string"},
 				"skip existing": {"type": "boolean"},
 				"module": {"type": "string"},
 				"fname": {"type": "string"},
 				"args": {"type": "array"}
 			},
-			"required": ["name","skip existing","module","fname"]
+			"required": ["skip existing","module","fname"]
 		},
 		"station": {
 			"type": "object",

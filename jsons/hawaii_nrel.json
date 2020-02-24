@@ -123,25 +123,27 @@
 		"outpath": "out_extend/",
 		"functions": [
 			{
-				"name": "haurwitz ghi",
 				"skip existing": false,
 				"module": "solarnc",
 				"fname": "csm_pvlib",
-				"args": ["haurwitz","ghi","K_",4]
+				"args": ["haurwitz","ghi",4]
 			},
 			{
-				"name": "ineichen ghi",
 				"skip existing": false,
 				"module": "solarnc",
 				"fname": "csm_pvlib",
-				"args": ["ineichen","ghi","K_",4]
+				"args": ["ineichen","ghi",4]
 			},
 			{
-				"name": "simplified_solis ghi",
 				"skip existing": false,
 				"module": "solarnc",
 				"fname": "csm_pvlib",
-				"args": ["simplified_solis","ghi","K_",4]
+				"args": ["simplified_solis","ghi",4]
+			},
+			{
+				"skip existing": false,
+				"module": "solarnc",
+				"fname": "solar_position"
 			}
 		],
 		"skip existing files": false,

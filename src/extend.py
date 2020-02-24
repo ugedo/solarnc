@@ -33,9 +33,9 @@ def add_new_variables(infile, stations, timezone, functions, outpath):
         else:
             if 'args' in f:
                 args = tuple(f['args'])
-                fun(df, f['skip existing'], f['name'], stations, *args)
+                fun(df, f['skip existing'], stations, *args)
             else:
-                fun(df, f['skip existing'], f['name'], stations)
+                fun(df, f['skip existing'], stations)
 
     base = os.path.basename(infile)
     day = os.path.splitext(base)[0]
@@ -51,10 +51,9 @@ def print_functions(functions):
     print("Applying the following functions on the files:")
     for f in functions:
         if 'args' in f:
-            msg = '\t{}, with args: {} -> {}'.format(f['fname'], f['args'],\
-                    f['name'])
+            msg = '\t{}, with args: {}'.format(f['fname'], f['args'])
         else:
-            msg = '\t{} -> {}'.format(f['fname'],f['name'])
+            msg = '\t{}'.format(f['fname'])
         print(msg)
 
 def main(options, args):
