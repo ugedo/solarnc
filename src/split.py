@@ -37,20 +37,11 @@ def split_random(infiles, args):
     #testset = [os.path.basename(f) for f in testset]
     return trainset, testset
 
-def get_infiles(config):
-    if "extend" in config:
-        extend = config['extend']
-        infiles  = glob.glob("{}/*.csv".format(extend['outpath']))
-    else:
-        fconfig = config['format']
-        infiles  = glob.glob("{}/*.csv".format(fconfig['outpath']))
-    return infiles
-
 def main(options, args):
     config = snc.load_config(options.config)
     print("Correct config format")
 
-    infiles = get_infiles(config)
+    infiles = snc.get_split_infiles(config)
     print("Input files:")
     print(infiles)
     trainset_fname, testset_fname = snc.get_ttlist_names(config)

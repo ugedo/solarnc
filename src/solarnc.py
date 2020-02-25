@@ -2,9 +2,9 @@ import json
 import os
 import csv
 import pandas as pd
-import numpy as np
 import jsonschema as jsch
 import pvlib
+import glob
 import multiprocessing as mp
 
 def load_config(fname):
@@ -47,6 +47,15 @@ def get_ttlist_names(config):
     trainset_fname = "{}/trainset.csv".format(outpath)
     testset_fname = "{}/testset.csv".format(outpath)
     return (trainset_fname, testset_fname)
+
+def get_split_infiles(config):
+    if "extend" in config:
+        extend = config['extend']
+        infiles  = glob.glob("{}/*.csv".format(extend['outpath']))
+    else:
+        fconfig = config['format']
+        infiles  = glob.glob("{}/*.csv".format(fconfig['outpath']))
+    return infiles
 
 # pvlib provides: ‘ineichen’, ‘haurwitz’, ‘simplified_solis'
 def csm_pvlib(df, skip_existing, stations, models, position):
