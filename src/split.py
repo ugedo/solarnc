@@ -17,7 +17,7 @@ def parse_options():
         parser.error("missing json config file")
     return (options, args)
 
-def split_random(infiles, outpath, args):
+def split_random(infiles, args):
     if "train" not in args:
         print("Error: random methods requires train arg")
         os._exit(-1)
@@ -37,25 +37,24 @@ def split_random(infiles, outpath, args):
     #testset = [os.path.basename(f) for f in testset]
     return trainset, testset
 
+def get_infiles(config):
+    if "extend" in config:
+        extend = config['extend']
+        infiles  = glob.glob("{}/*.csv".format(extend['outpath']))
+    else:
+        fconfig = config['format']
+        infiles  = glob.glob("{}/*.csv".format(fconfig['outpath']))
+    return infiles
+
 def main(options, args):
     config = snc.load_config(options.config)
     print("Correct config format")
 
-    if "extend" in config:
-        extend = config['extend']
-        path = extend['outpath']
-    else:
-        fconfig = config['format']
-        path = fconfig['outpath']
-
-    print("Input files from {}".format(path))
-    infiles  = glob.glob("{}/*.csv".format(path))
+    infiles = get_infiles(config)
+    print("Input files:")
     print(infiles)
-
-    outpath = "{}/lists".format(path)
-    if not os.path.exists(outpath):
-        os.makedirs(outpath)
-    print("Output files to {}".format(outpath))
+    trainset_fname, testset_fname = snc.get_ttlist_names(config)
+    print("Output to {} and {}".format(trainset_fname, testset_fname))
 
     spconfig = config['split']
     method = spconfig['method']
@@ -69,18 +68,15 @@ def main(options, args):
         print("Error: unknown method {}".method['name'])
         os._exit(-1)
 
-    trainset_fname = "{}/trainset.csv".format(outpath)
-    testset_fname = "{}/testset.csv".format(outpath)
 
     if spconfig['skip existing']:
-        existing = glob.glob("{}/*.csv".format(outpath))
-        if trainset_fname in existing and testset_fname in existing:
+        if os.path.exists(trainset_fname) and os.path.exists(testset_fname):
             print("Skipping split fase, lists already exist")
             os._exit(0)
 
     #TODO: check that it is a funtion/callable
     fun = globals()[mname]
-    trainset, testset = fun(infiles, outpath, args)
+    trainset, testset = fun(infiles, args)
 
     print("Train set:")
     print(trainset)
