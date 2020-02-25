@@ -4,9 +4,6 @@ import csv
 import pandas as pd
 import numpy as np
 import jsonschema as jsch
-#import pvlib
-from pvlib.location import Location
-from pvlib import clearsky
 import pvlib
 import multiprocessing as mp
 
@@ -42,27 +39,50 @@ def read_list(fname):
 
 # pvlib provides: ‘ineichen’, ‘haurwitz’, ‘simplified_solis'
 def csm_pvlib(df, skip_existing, stations, models, position):
-    for sta in stations:
-        staname = sta['name']
+    def elevation_azimuth(df, solpos, staname, skip_existing):
+        ecol = 'elevation {}'.format(staname)
+        acol = 'azimuth {}'.format(staname)
+        if position and (ecol not in df.columns or not skip_existing):
+            df[ecol] = solpos['apparent_elevation']
+            df[acol] = solpos['azimuth']
+
+    def csm(df, model, sta, solpos, pressure, dni_extra):
         latitude = sta["latitude"]
         longitude = sta["longitude"]
         altitude = sta["MASL"] if "MASL" in sta else 0
-        ecol = 'elevation {}'.format(staname)
-        acol = 'azimuth {}'.format(staname)
-
-        solpos = pvlib.solarposition.get_solarposition(df.index, latitude,\
-                longitude)
         apparent_elevation = solpos['apparent_elevation']
         apparent_zenith = solpos['apparent_zenith']
 
-        if position and ecol not in df.columns:
-            df[ecol] = apparent_elevation
-            df[acol] = solpos['azimuth']
+        if model == 'ineichen':
+            airmass = pvlib.atmosphere.get_relative_airmass(apparent_zenith)
+            airmass = pvlib.atmosphere.get_absolute_airmass(airmass, \
+                    pressure)
+            linke_turbidity = pvlib.clearsky.lookup_linke_turbidity(\
+                    df.index, latitude, longitude)
+            ghi_csm = pvlib.clearsky.ineichen(apparent_zenith, airmass,\
+                    linke_turbidity, altitude, dni_extra)['ghi']
+        elif model == 'simplified_solis':
+            aod700 = 0.1
+            precipitable_water = 1
+            ghi_csm = pvlib.clearsky.simplified_solis(apparent_elevation,\
+                    aod700, precipitable_water, pressure, dni_extra)['ghi']
+        elif model == 'haurwitz':
+            ghi_csm = pvlib.clearsky.haurwitz(apparent_zenith)
+        else:
+            print("Error: {} model not supportd")
+            raise ValueError
+        return ghi_csm
 
-        if 'ineichen' in models or 'solis' in models \
-                or 'simplified_solis' in models:
-            pressure = pvlib.atmosphere.alt2pres(altitude)
-            dni_extra = pvlib.irradiance.get_extra_radiation(df.index)
+    if 'ineichen' in models or 'simplified_solis' in models:
+        dni_extra = pvlib.irradiance.get_extra_radiation(df.index)
+
+    for sta in stations:
+        staname = sta['name']
+        altitude = sta["MASL"] if "MASL" in sta else 0
+        pressure = pvlib.atmosphere.alt2pres(altitude)
+        solpos = pvlib.solarposition.get_solarposition(df.index,\
+                sta["latitude"], sta["longitude"], altitude, pressure)
+        elevation_azimuth(df, solpos, staname, skip_existing)
 
         for model in models:
             ghicol = "GHI {}".format(staname)
@@ -70,41 +90,8 @@ def csm_pvlib(df, skip_existing, stations, models, position):
             kcol = "K_{} {}".format(model, staname)
             if skip_existing and csmcol in df.columns:
                 continue
-            if model == 'ineichen':
-                airmass = pvlib.atmosphere.get_relative_airmass(apparent_zenith)
-                airmass = pvlib.atmosphere.get_absolute_airmass(airmass, \
-                        pressure)
-                linke_turbidity = pvlib.clearsky.lookup_linke_turbidity(\
-                        df.index, latitude, longitude)
-                df[csmcol] = clearsky.ineichen(apparent_zenith, airmass,\
-                        linke_turbidity, altitude, dni_extra)['ghi']
-            elif model == 'solis' or model == 'simplified_solis':
-                aod700 = 0.1
-                precipitable_water = 1
-                df[csmcol] = clearsky.simplified_solis(apparent_elevation,\
-                        aod700, precipitable_water, pressure, dni_extra)['ghi']
-            elif model == 'haurwitz':
-                sin_elevation = np.sin(np.radians(apparent_elevation))
-                df[csmcol] = 1098 * sin_elevation * np.exp(-0.057/sin_elevation)
-            else:
-                print("Error: {} model not supportd")
-                raise ValueError
+            df[csmcol] = csm(df, model, sta, solpos, pressure, dni_extra)
             df[kcol] = df[ghicol]/df[csmcol]
-
-def solar_position(df, skip_existing, stations):
-    for sta in stations:
-        ecol = 'elevation {}'.format(sta['name'])
-        acol = 'azimuth {}'.format(sta['name'])
-        if skip_existing and ecol in df.columns and acol in df.columns:
-            continue
-        latitude = sta["latitude"]
-        longitude = sta["longitude"]
-        altitude = sta["MASL"] if "MASL" in sta else 0
-        loc = Location(latitude, longitude, df.index.tz.zone, altitude)
-        #TODO: should use temperature if available
-        solpos = loc.get_solarposition(df.index)
-        df[ecol] = solpos['elevation']
-        df[acol] = solpos['azimuth']
 
 def run_cbk_unpack(tup):
     cbk, argtup = tup

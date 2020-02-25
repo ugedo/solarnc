@@ -120,7 +120,7 @@
 		"skip existing": false
 	},
 	"extend": {
-		"outpath": "out_extend/",
+		"outpath": "out_extend_fused/",
 		"functions": [
 			{
 				"skip existing": false,
