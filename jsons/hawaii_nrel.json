@@ -138,5 +138,19 @@
 			"args": {"train": 70}
 		},
 		"skip existing": false
+	},
+	"fselect": {
+		"outpath": "out_fselect/",
+		"period": "5min",
+		"updating interval": "15min",
+		"window": "1h",
+		"lead time": "1h",
+		"features": {
+			"station lagged": ["K_haurwitz"],
+			"station unlagged": ["elevation","azimuth"],
+			"lagged": [],
+			"unlagged": []
+		},
+		"target": "K_haurwitz"
 	}
 }

@@ -86,7 +86,50 @@
 				"skip existing": {"type": "boolean"}
 			},
 			"required": ["method", "skip existing"]
+		},
+		"fselect": {
+			"type": "object",
+			"properties": {
+				"outpath": {"type": "string"},
+				"period": {"type": "string"},
+				"updating interval": {"type": "string"},
+				"window": {"type": "string"},
+				"lead time": {"type": "string"},
+				"fetures": {
+					"type": "object",
+					"properties": {
+						"station lagged": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"station unlagged": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"lagged": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"unlagged": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					},
+					"additionalProperties": false,
+					"required": ["station lagged", "station unlagged", "lagged", "unlagged"]
+				},
+				"target": {"type": "string"}
+			},
+			"required": ["period", "updating interval", "window", "lead time", "features", "target"]
 		}
 	},
-	"required": ["dataset", "format", "split"]
+	"required": ["dataset", "format", "split","fselect"]
 }
