@@ -92,9 +92,7 @@
 			"properties": {
 				"outpath": {"type": "string"},
 				"period": {"type": "string"},
-				"updating interval": {"type": "string"},
 				"window": {"type": "string"},
-				"lead time": {"type": "string"},
 				"fetures": {
 					"type": "object",
 					"properties": {
@@ -124,11 +122,26 @@
 						}
 					},
 					"additionalProperties": false,
-					"required": ["station lagged", "station unlagged", "lagged", "unlagged"]
+					"required": ["station lagged", "station unlagged", "lagged",
+						"unlagged"]
 				},
-				"target": {"type": "string"}
+				"forecasted variable": {"type": "string"},
+				"horizons": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"lead time": {"type": "string"},
+							"interval": {"type": "string"}
+						},
+						"additionalProperties": false,
+						"required": ["lead time", "interval"]
+					},
+					"minItems": 1
+				}
 			},
-			"required": ["period", "updating interval", "window", "lead time", "features", "target"]
+			"required": ["period", "window", "features", "forecasted variable",
+			"horizons"]
 		}
 	},
 	"required": ["dataset", "format", "split","fselect"]

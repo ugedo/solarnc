@@ -142,15 +142,30 @@
 	"fselect": {
 		"outpath": "out_fselect/",
 		"period": "5min",
-		"updating interval": "15min",
 		"window": "1h",
-		"lead time": "1h",
 		"features": {
 			"station lagged": ["K_haurwitz"],
 			"station unlagged": ["elevation","azimuth"],
 			"lagged": [],
 			"unlagged": []
 		},
-		"target": "K_haurwitz"
+		"forecasted variable": "K_haurwitz",
+		"horizons": [
+			{
+				"lead time": "15min",
+				"interval": "-15min"
+			},
+			{
+				"lead time": "30min",
+				"interval": "-15min"
+			},
+			{
+				"lead time": "45min",
+				"interval": "-15min"
+			},
+			{
+				"lead time": "1h",
+				"interval": "-15min"
+			}]
 	}
 }
