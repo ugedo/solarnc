@@ -89,7 +89,7 @@ def csm_pvlib(df, skip_existing, stations, models, position):
         elif model == 'haurwitz':
             ghi_csm = pvlib.clearsky.haurwitz(apparent_zenith)
         else:
-            print("Error: {} model not supportd")
+            print("Error: {} model not supportd".format(model))
             raise ValueError
         return ghi_csm
 
