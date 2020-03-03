@@ -26,7 +26,9 @@ def add_new_variables(infile, stations, timezone, functions):
         try:
             module = __import__(f['module'])
             fun = getattr(module, f['fname'])
-            #TODO: check that it is a funtion
+            if not callable(fun):
+                print("fname should be a callable python object")
+                raise ValueError
         except AttributeError:
             print("Error: could not find function {} in module {}"\
                     .format(f['fname'],f['module']))
