@@ -74,6 +74,7 @@
 		"split": {
 			"type": "object",
 			"properties": {
+				"outpath": {"type": "string"},
 				"method": {
 					"type": "object",
 					"properties": {
@@ -84,7 +85,7 @@
 				}
 			},
 			"additionalProperties": false,
-			"required": ["method"]
+			"required": ["method","outpath"]
 		},
 		"fselect": {
 			"type": "object",

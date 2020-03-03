@@ -46,14 +46,14 @@ def main(options, args):
     print("Input files:")
     print(infiles)
 
-    outpath = "{}/lists".format(fconfig['outpath'])
+    spconfig = config['split']
+    outpath = spconfig['outpath']
     if not os.path.exists(outpath):
         os.makedirs(outpath)
     trainset_fname = "{}/trainset.csv".format(outpath)
     testset_fname = "{}/testset.csv".format(outpath)
     print("Output to {} and {}".format(trainset_fname, testset_fname))
 
-    spconfig = config['split']
     method = spconfig['method']
     mname = "split_{}".format(method['name'])
     if "args" in method:
