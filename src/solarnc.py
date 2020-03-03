@@ -61,11 +61,11 @@ def get_split_infiles(config):
 # pvlib provides: ‘ineichen’, ‘haurwitz’, ‘simplified_solis'
 def csm_pvlib(df, skip_existing, stations, models, position):
     def elevation_azimuth(df, solpos, staname, skip_existing):
-        ecol = 'elevation {}'.format(staname)
-        acol = 'azimuth {}'.format(staname)
+        ecol = 'nelevation {}'.format(staname)
+        acol = 'nazimuth {}'.format(staname)
         if position and (ecol not in df.columns or not skip_existing):
-            df[ecol] = solpos['apparent_elevation']
-            df[acol] = solpos['azimuth']
+            df[ecol] = solpos['apparent_elevation'] / 90
+            df[acol] = solpos['azimuth'] / 360
 
     def csm(df, model, sta, solpos, pressure, dni_extra):
         latitude = sta["latitude"]
