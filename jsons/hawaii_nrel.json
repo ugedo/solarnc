@@ -114,8 +114,6 @@
 			"AP6", "AP1", "AP5", "AP4", "AP7", "DH6", "DH7", "DH8"],
 		"module": "hawaii_nrel",
 		"fname": "nrelformat",
-		"start": 730,
-		"end": 1730,
 		"rejectpath": "out_format/reject",
 		"skip existing": false
 	},
