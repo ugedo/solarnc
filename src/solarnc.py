@@ -2,6 +2,7 @@ import json
 import os
 import csv
 import pandas as pd
+import numpy as np
 import jsonschema as jsch
 import pvlib
 import glob
@@ -91,6 +92,8 @@ def csm_pvlib(df, skip_existing, stations, models, position):
         else:
             print("Error: {} model not supportd".format(model))
             raise ValueError
+        ghi_csm[ghi_csm < np.finfo(float).eps] = 0
+
         return ghi_csm
 
     if 'ineichen' in models or 'simplified_solis' in models:
@@ -111,7 +114,7 @@ def csm_pvlib(df, skip_existing, stations, models, position):
             if skip_existing and csmcol in df.columns:
                 continue
             df[csmcol] = csm(df, model, sta, solpos, pressure, dni_extra)
-            df[kcol] = df[ghicol]/df[csmcol]
+            df[kcol] = df[ghicol]/df[csmcol].replace({0: np.finfo(float).eps})
 
 def run_cbk_unpack(tup):
     cbk, argtup = tup
