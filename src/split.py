@@ -33,8 +33,8 @@ def split_random(infiles, args):
     print("Random split: train {} days, test {} days".format(ntrain, ntest))
     trainset = random.sample(infiles, ntrain)
     testset = [f for f in infiles if f not in trainset]
-    #trainset = [os.path.basename(f) for f in trainset]
-    #testset = [os.path.basename(f) for f in testset]
+    trainset = [os.path.splitext(os.path.basename(f))[0] for f in trainset]
+    testset = [os.path.splitext(os.path.basename(f))[0] for f in testset]
     return trainset, testset
 
 def main(options, args):
