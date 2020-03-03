@@ -93,7 +93,6 @@ def csm_pvlib(df, skip_existing, stations, models, position):
             print("Error: {} model not supportd".format(model))
             raise ValueError
         ghi_csm[ghi_csm < np.finfo(float).eps] = 0
-
         return ghi_csm
 
     if 'ineichen' in models or 'simplified_solis' in models:
