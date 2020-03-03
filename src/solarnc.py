@@ -38,26 +38,6 @@ def read_list(fname):
         l = list(reader)
     return l[0]
 
-def get_ttlist_names(config):
-    if "extend" in config:
-        extend = config['extend']
-        outpath = "{}/lists".format(extend['outpath'])
-    else:
-        fconfig = config['format']
-        outpath = "{}/lists".format(fconfig['outpath'])
-    trainset_fname = "{}/trainset.csv".format(outpath)
-    testset_fname = "{}/testset.csv".format(outpath)
-    return (trainset_fname, testset_fname)
-
-def get_split_infiles(config):
-    if "extend" in config:
-        extend = config['extend']
-        infiles  = glob.glob("{}/*.csv".format(extend['outpath']))
-    else:
-        fconfig = config['format']
-        infiles  = glob.glob("{}/*.csv".format(fconfig['outpath']))
-    return infiles
-
 # pvlib provides: ‘ineichen’, ‘haurwitz’, ‘simplified_solis'
 def csm_pvlib(df, skip_existing, stations, models, position):
     def elevation_azimuth(df, solpos, staname, skip_existing):

@@ -20,7 +20,7 @@ def parse_options():
     if not options.config: parser.error("missing json config file")
     return (options, args)
 
-def add_new_variables(infile, stations, timezone, functions, outpath):
+def add_new_variables(infile, stations, timezone, functions):
     df = snc.read_csv(infile, timezone)
     for f in functions:
         try:
@@ -36,11 +36,7 @@ def add_new_variables(infile, stations, timezone, functions, outpath):
                 fun(df, f['skip existing'], stations, *args)
             else:
                 fun(df, f['skip existing'], stations)
-
-    base = os.path.basename(infile)
-    day = os.path.splitext(base)[0]
-    outfile = "{}/{}.csv".format(outpath, day)
-    snc.save_csv(df, outfile)
+    snc.save_csv(df, infile)
 
 def print_stations(stations):
     print("Considering the following stations: ")
@@ -75,24 +71,14 @@ def main(options, args):
     print_stations(stations)
 
     path = fconfig['outpath']
-    print("Input files from: {}".format(path))
+    print("Extending files from: {}".format(path))
     infiles  = glob.glob("{}/*.csv".format(path))
     print(infiles)
-
-    outpath = extend['outpath']
-    print("Output files to: {}".format(outpath))
-    if not os.path.exists(outpath):
-        os.makedirs(outpath)
 
     functions = extend['functions']
     print_functions(functions)
 
-    if extend['skip existing files']:
-        infiles, skipped = skip_existing_files(infiles, outpath)
-        print("Skipped files:")
-        print(skipped)
-
-    args = [(f, stations, timezone, functions, outpath) for f in infiles]
+    args = [(f, stations, timezone, functions) for f in infiles]
     snc.runjobs(add_new_variables, args, options.npjobs)
 
 if __name__ == "__main__":

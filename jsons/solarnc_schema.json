@@ -60,17 +60,16 @@
 		"extend": {
 			"type": "object",
 			"properties": {
-				"outpath": {"type": "string"},
 				"functions": {
 					"type": "array",
 					"items": {
 						"$ref": "#/definitions/function",
 						"minItems": 1
 					}
-				},
-				"skip existing files": {"type": "boolean"}
+				}
 			},
-			"required": ["outpath","functions","skip existing files", "skip existing variables"]
+			"additionalProperties": false,
+			"required": ["functions"]
 		},
 		"split": {
 			"type": "object",
@@ -82,10 +81,10 @@
 						"args": {"type": "object"}
 					},
 					"required": ["name"]
-				},
-				"skip existing": {"type": "boolean"}
+				}
 			},
-			"required": ["method", "skip existing"]
+			"additionalProperties": false,
+			"required": ["method"]
 		},
 		"fselect": {
 			"type": "object",

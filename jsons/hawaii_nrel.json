@@ -118,7 +118,6 @@
 		"skip existing": false
 	},
 	"extend": {
-		"outpath": "out_extend/",
 		"functions": [
 			{
 				"skip existing": false,
@@ -126,16 +125,13 @@
 				"fname": "csm_pvlib",
 				"args": [["haurwitz","ineichen","simplified_solis"],true]
 			}
-		],
-		"skip existing files": false,
-		"skip existing variables": false
+		]
 	},
 	"split": {
 		"method" : {
 			"name": "random",
 			"args": {"train": 70}
-		},
-		"skip existing": false
+		}
 	},
 	"fselect": {
 		"outpath": "out_fselect/",

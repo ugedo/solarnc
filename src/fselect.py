@@ -181,7 +181,7 @@ def main(options, margs):
             if sta['name'] in fconfig['stations']]
     print_stations(stations)
 
-    infiles = snc.get_split_infiles(config)
+    infiles  = glob.glob("{}/*.csv".format(fconfig['outpath']))
     print("Input files:")
     print(infiles)
 

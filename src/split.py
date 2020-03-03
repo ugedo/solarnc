@@ -41,10 +41,16 @@ def main(options, args):
     config = snc.load_config(options.config)
     print("Correct config format")
 
-    infiles = snc.get_split_infiles(config)
+    fconfig = config['format']
+    infiles  = glob.glob("{}/*.csv".format(fconfig['outpath']))
     print("Input files:")
     print(infiles)
-    trainset_fname, testset_fname = snc.get_ttlist_names(config)
+
+    outpath = "{}/lists".format(fconfig['outpath'])
+    if not os.path.exists(outpath):
+        os.makedirs(outpath)
+    trainset_fname = "{}/trainset.csv".format(outpath)
+    testset_fname = "{}/testset.csv".format(outpath)
     print("Output to {} and {}".format(trainset_fname, testset_fname))
 
     spconfig = config['split']
@@ -58,12 +64,6 @@ def main(options, args):
     if mname not in globals():
         print("Error: unknown method {}".method['name'])
         os._exit(-1)
-
-
-    if spconfig['skip existing']:
-        if os.path.exists(trainset_fname) and os.path.exists(testset_fname):
-            print("Skipping split fase, lists already exist")
-            os._exit(0)
 
     #TODO: check that it is a funtion/callable
     fun = globals()[mname]
