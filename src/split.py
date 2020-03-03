@@ -65,8 +65,10 @@ def main(options, args):
         print("Error: unknown method {}".method['name'])
         os._exit(-1)
 
-    #TODO: check that it is a funtion/callable
     fun = globals()[mname]
+    if not callable(fun):
+        print("method should be a callable python object")
+        raise ValueError
     trainset, testset = fun(infiles, args)
 
     print("Train set:")
