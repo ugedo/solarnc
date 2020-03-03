@@ -143,7 +143,7 @@
 		"window": "1h",
 		"features": {
 			"station lagged": ["K_haurwitz"],
-			"station unlagged": ["elevation","azimuth"],
+			"station unlagged": ["nelevation","nazimuth"],
 			"lagged": [],
 			"unlagged": []
 		},
