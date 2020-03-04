@@ -73,7 +73,7 @@ def csm_pvlib(df, skip_existing, stations, models, position):
             print("Error: {} model not supportd".format(model))
             raise ValueError
         ghi_csm[ghi_csm < np.finfo(float).eps] = 0
-        return ghi_csm
+        return ghi_csm.round(4)
 
     if 'ineichen' in models or 'simplified_solis' in models:
         dni_extra = pvlib.irradiance.get_extra_radiation(df.index)
@@ -94,6 +94,7 @@ def csm_pvlib(df, skip_existing, stations, models, position):
                 continue
             df[csmcol] = csm(df, model, sta, solpos, pressure, dni_extra)
             df[kcol] = df[ghicol]/df[csmcol].replace({0: np.finfo(float).eps})
+            df[kcol] = df[kcol].round(4)
 
 def run_cbk_unpack(tup):
     cbk, argtup = tup
