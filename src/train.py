@@ -18,8 +18,8 @@ def parse_options():
     return (options, args)
 
 def print_model(m):
-    print("* {} with outputs for {} and horizons {}".format(m['model type'], \
-            m['target stations'], m['horizons']))
+    print("* {} with outputs for {}".format(m['model type'], \
+            m['target stations']))
 
 def main(options, args):
     config = snc.load_config(options.config)

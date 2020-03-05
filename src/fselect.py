@@ -32,16 +32,14 @@ def get_ttsets(config):
     testset = snc.read_list(testset_fname)
     return (trainset, testset)
 
-def print_horizon(h):
-    ltime = h['lead time']
-    interval = h['interval']
+def get_interval_string(horizon, interval):
     if interval[0] == '-':
-        istr = '(t+{}{},t+{})'.format(ltime,interval,ltime)
+        istr = '[t+{}{},t+{}]'.format(horizon,interval,horizon)
     elif interval[0] == '+':
-        istr = '(t+{},t+{}{})'.format(ltime,ltime,interval)
+        istr = '[t+{},t+{}{}]'.format(horizon,horizon,interval)
     else:
-        istr = '(t+{},t+{}+{})'.format(ltime,ltime,interval)
-    print("\t- horizon t + {}, interval {}".format(ltime, istr))
+        istr = '[t+{},t+{}+{}]'.format(horizon,horizon,interval)
+    return istr
 
 def check_config(fsconfig):
     outpath = fsconfig['outpath']
@@ -68,10 +66,14 @@ def check_config(fsconfig):
     print("Station independent unlagged features: {}".\
             format(features['unlagged']))
 
-    print("Forecasted variable: {}".format(fsconfig['forecasted variable']))
-    print("Forecasting horizons for instant t:")
-    for h in fsconfig['horizons']:
-        print_horizon(h)
+    fvar = fsconfig['forecasting target']['variable']
+    horizon = fsconfig['forecasting target']['horizon']
+    interval = fsconfig['forecasting target']['interval']
+
+    print("Forecasting variable: {}".format(fvar))
+    print("Forecasting horizon: t+{}".format(horizon))
+    istr = get_interval_string(horizon, interval)
+    print("Forecasting interval {}".format(istr))
 
 def get_lagged_vars(stations, fsconfig):
     features = fsconfig["features"]
@@ -100,28 +102,26 @@ def get_lagged_data(df, columns, lags):
     return newd
 
 def get_target_data(df, stations, fsconfig):
-    def get_values(tdata, h):
-        ltime = h['lead time']
-        fint = h['interval']
-        off1 = pd.Timedelta(ltime)
+    def get_values(tdata, horizon, interval):
+        off1 = pd.Timedelta(horizon)
         off2 = off1
-        if fint[0] == '-':
-             off1 += pd.Timedelta(fint)
+        if interval[0] == '-':
+             off1 += pd.Timedelta(interval)
         else:
-             off2 += pd.Timedelta(fint)
+             off2 += pd.Timedelta(interval)
         th = tdata.index.map(lambda s: tdata.loc[s + off1:s + off2].mean())
         return pd.Series(th, index=tdata.index)
 
-    fvar = fsconfig['forecasted variable']
-    horizons = fsconfig['horizons']
+    fvar = fsconfig['forecasting target']['variable']
+    horizon = fsconfig['forecasting target']['horizon']
+    interval = fsconfig['forecasting target']['interval']
     newd = {}
     for sta in stations:
         staname = sta['name']
-        tdata = df['{} {}'.format(fvar,staname)]
-        newnames = ["{} {} {}".format(fvar,staname,h['lead time']) \
-                for h in horizons]
-        newcols = [get_values(tdata, h) for h in horizons]
-        newd.update(list(zip(newnames, newcols)))
+        fdata = df['{} {}'.format(fvar,staname)]
+        tname = "{} {} {}".format(fvar,staname,horizon)
+        tdata = get_values(fdata, horizon, interval)
+        newd.update([(tname, tdata)])
     return newd
 
 def get_offset(df, period):
@@ -135,10 +135,12 @@ def fselect(infile, stations, timezone, fsconfig):
     base = os.path.basename(infile)
     day = os.path.splitext(base)[0]
 
-    fvar = fsconfig['forecasted variable']
     period = fsconfig['period']
     window = fsconfig['window']
     lags = int(timeparse(window) / timeparse(period))
+    fvar = fsconfig['forecasting target']['variable']
+    horizon = fsconfig['forecasting target']['horizon']
+    interval = fsconfig['forecasting target']['interval']
 
     # build features matrix
     lagged = get_lagged_vars(stations, fsconfig)

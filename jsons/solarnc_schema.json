@@ -125,23 +125,18 @@
 					"required": ["station lagged", "station unlagged", "lagged",
 						"unlagged"]
 				},
-				"forecasted variable": {"type": "string"},
-				"horizons": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"lead time": {"type": "string"},
-							"interval": {"type": "string"}
-						},
-						"additionalProperties": false,
-						"required": ["lead time", "interval"]
+				"forecasting target": {
+					"type": "object",
+					"properties": {
+						"variable": {"type": "string"},
+						"horizon": {"type": "string"},
+						"interval": {"type": "string"}
 					},
-					"minItems": 1
+					"additionalProperties": false,
+					"required": ["variable", "horizon", "interval"]
 				}
 			},
-			"required": ["period", "window", "features", "forecasted variable",
-			"horizons"]
+			"required": ["period", "window", "features", "forecasting target"]
 		},
 		"train": {
 			"type": "object",
@@ -157,10 +152,6 @@
 								"type": "array",
 								"items": {"type": "string", "minItems": 1}
 							},
-							"horizons": {
-								"type": "array",
-								"items": {"type": "string", "minItems": 1}
-							},
 							"hyperparameters": {
 								"type": "object",
 								"properties": {
@@ -169,8 +160,7 @@
 							}
 						},
 						"additionalProperties": false,
-						"required": ["model type", "outpath", "target stations",
-							"horizons"],
+						"required": ["model type", "outpath", "target stations"],
 							"minItems": 1
 					}
 				}
