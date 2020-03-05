@@ -87,7 +87,7 @@
 			"additionalProperties": false,
 			"required": ["method","outpath"]
 		},
-		"fselect": {
+		"train": {
 			"type": "object",
 			"properties": {
 				"outpath": {"type": "string"},
@@ -129,11 +129,29 @@
 					"type": "object",
 					"properties": {
 						"variable": {"type": "string"},
+						"stations": {
+							"type": "array",
+							"items": {"type": "string", "minItems": 1}
+						},
 						"horizon": {"type": "string"},
 						"interval": {"type": "string"}
 					},
 					"additionalProperties": false,
 					"required": ["variable", "horizon", "interval"]
+				},
+				"model": {
+					"type": "object",
+					"properties": {
+						"model type": {"type": "string"},
+						"hyperparameters": {
+							"type": "object",
+							"properties": {
+								"search method": {"type": "string"}
+							}
+						}
+					},
+					"additionalProperties": false,
+					"required": ["model type"]
 				}
 			},
 			"required": ["period", "window", "features", "forecasting target"]
@@ -141,31 +159,8 @@
 		"train": {
 			"type": "object",
 			"properties": {
-				"models": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"model type": {"type": "string"},
-							"outpath": {"type": "string"},
-							"target stations": {
-								"type": "array",
-								"items": {"type": "string", "minItems": 1}
-							},
-							"hyperparameters": {
-								"type": "object",
-								"properties": {
-									"search method": {"type": "string"}
-								}
-							}
-						},
-						"additionalProperties": false,
-						"required": ["model type", "outpath", "target stations"],
-							"minItems": 1
-					}
-				}
 			}
 		}
 	},
-	"required": ["dataset", "format", "split","fselect"]
+	"required": ["dataset", "format", "split","train"]
 }

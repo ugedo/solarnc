@@ -134,8 +134,8 @@
 			"args": {"train": 70}
 		}
 	},
-	"fselect": {
-		"outpath": "out_fselect/",
+	"train": {
+		"outpath": "out_train/",
 		"period": "5min",
 		"window": "1h",
 		"features": {
@@ -146,27 +146,12 @@
 		},
 		"forecasting target": {
 			"variable": "K_haurwitz",
+			"stations": ["DH3", "DH4"],
 			"horizon": "15min",
 			"interval": "-15min"
+		},
+		"model": {
+			"model type": "MLP"
 		}
-	},
-	"train": {
-		"models": [
-			{
-				"model type": "MLP",
-				"outpath": "out_MLP_DH3_DH4_15_30/",
-				"target stations": ["DH3", "DH4"]
-			},
-			{
-				"model type": "MLP",
-				"outpath": "out_MLP_DH3_15/",
-				"target stations": ["DH3"]
-			},
-			{
-				"model type": "MLP",
-				"outpath": "out_MLP_DH4_15/",
-				"target stations": ["DH4"]
-			}
-		]
 	}
 }
