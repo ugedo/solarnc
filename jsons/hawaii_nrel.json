@@ -134,8 +134,8 @@
 			"args": {"train": 70}
 		}
 	},
-	"train": {
-		"outpath": "out_train/",
+	"fselect": {
+		"outpath": "out_fselect/",
 		"period": "5min",
 		"window": "1h",
 		"features": {
@@ -149,9 +149,18 @@
 			"stations": ["DH3", "DH4"],
 			"horizon": "15min",
 			"interval": "-15min"
-		},
-		"model": {
-			"model type": "MLP"
 		}
+	},
+	"train": {
+		"models": [
+			{
+				"model type": "MLP",
+				"outpath": "MLP_10_10_10",
+				"hyperparameters": {
+					"hidden layers": [10, 10, 10],
+					"alpha": 0.1
+				}
+			}
+		]
 	}
 }

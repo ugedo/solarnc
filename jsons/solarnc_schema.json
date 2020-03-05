@@ -22,6 +22,24 @@
 				"MASL": {"type": "number"}
 			},
 			"required": ["name","latitude", "longitude"]
+		},
+		"model": {
+			"type": "object",
+			"properties": {
+				"model type": {
+					"type": "string",
+					"enum": ["MLP", "Linear"]
+				},
+				"outpath": {"type": "string"},
+				"hyperparameters": {
+					"type": "object",
+					"properties": {
+						"search method": {"type": "string"}
+					}
+				}
+			},
+			"additionalProperties": false,
+			"required": ["model type", "outpath"]
 		}
 	},
 	"properties": {
@@ -87,7 +105,7 @@
 			"additionalProperties": false,
 			"required": ["method","outpath"]
 		},
-		"train": {
+		"fselect": {
 			"type": "object",
 			"properties": {
 				"outpath": {"type": "string"},
@@ -138,20 +156,6 @@
 					},
 					"additionalProperties": false,
 					"required": ["variable", "horizon", "interval"]
-				},
-				"model": {
-					"type": "object",
-					"properties": {
-						"model type": {"type": "string"},
-						"hyperparameters": {
-							"type": "object",
-							"properties": {
-								"search method": {"type": "string"}
-							}
-						}
-					},
-					"additionalProperties": false,
-					"required": ["model type"]
 				}
 			},
 			"required": ["period", "window", "features", "forecasting target"]
@@ -159,8 +163,16 @@
 		"train": {
 			"type": "object",
 			"properties": {
-			}
+				"models": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/model",
+						"minItems": 1
+					}
+				}
+			},
+			"required": ["models"]
 		}
 	},
-	"required": ["dataset", "format", "split","train"]
+	"required": ["dataset", "format", "split","fselect", "train"]
 }
