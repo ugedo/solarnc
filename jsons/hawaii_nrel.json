@@ -162,5 +162,51 @@
 				"lead time": "1h",
 				"interval": "-15min"
 			}]
+	},
+	"train": {
+		"models": [
+			{
+				"model type": "MLP",
+				"outpath": "out_MLP_DH3_DH4_15_30/",
+				"target stations": ["DH3", "DH4"],
+				"horizons": ["15min", "30min"]
+			},
+			{
+				"model type": "MLP",
+				"outpath": "out_MLP_DH3_DH4_15/",
+				"target stations": ["DH3", "DH4"],
+				"horizons": ["15min"]
+			},
+			{
+				"model type": "MLP",
+				"outpath": "out_MLP_DH3_DH4_30/",
+				"target stations": ["DH3", "DH4"],
+				"horizons": ["30min"]
+			},
+			{
+				"model type": "MLP",
+				"outpath": "out_MLP_DH3_15/",
+				"target stations": ["DH3"],
+				"horizons": ["15min"]
+			},
+			{
+				"model type": "MLP",
+				"outpath": "out_MLP_DH3_30/",
+				"target stations": ["DH3"],
+				"horizons": ["30min"]
+			},
+			{
+				"model type": "MLP",
+				"outpath": "out_MLP_DH4_15/",
+				"target stations": ["DH4"],
+				"horizons": ["15min"]
+			},
+			{
+				"model type": "MLP",
+				"outpath": "out_MLP_DH4_30/",
+				"target stations": ["DH4"],
+				"horizons": ["30min"]
+			}
+		]
 	}
 }

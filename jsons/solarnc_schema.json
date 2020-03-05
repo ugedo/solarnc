@@ -142,6 +142,39 @@
 			},
 			"required": ["period", "window", "features", "forecasted variable",
 			"horizons"]
+		},
+		"train": {
+			"type": "object",
+			"properties": {
+				"models": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"model type": {"type": "string"},
+							"outpath": {"type": "string"},
+							"target stations": {
+								"type": "array",
+								"items": {"type": "string", "minItems": 1}
+							},
+							"horizons": {
+								"type": "array",
+								"items": {"type": "string", "minItems": 1}
+							},
+							"hyperparameters": {
+								"type": "object",
+								"properties": {
+									"search method": {"type": "string"}
+								}
+							}
+						},
+						"additionalProperties": false,
+						"required": ["model type", "outpath", "target stations",
+							"horizons"],
+							"minItems": 1
+					}
+				}
+			}
 		}
 	},
 	"required": ["dataset", "format", "split","fselect"]
