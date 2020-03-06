@@ -152,14 +152,22 @@
 		}
 	},
 	"train": {
+		"outpath": "out_train",
+		"skip existing": false,
 		"models": [
 			{
-				"model type": "MLP",
-				"outpath": "MLP_10_10_10",
-				"hyperparameters": {
-					"hidden layers": [10, 10, 10],
-					"alpha": 0.1
-				}
+				"model type": "MLPRegressor",
+				"filename": "MLP",
+				"cv": 5,
+				"alpha": [0.01],
+				"hidden layers count": [3],
+				"hidden layers sizes": [10, 100]
+			},
+			{
+				"model type": "Ridge",
+				"filename": "Ridge",
+				"cv": 5,
+				"alpha": [0.001, 0.01, 0.1]
 			}
 		]
 	}

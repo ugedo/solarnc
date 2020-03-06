@@ -117,5 +117,16 @@ def runjobs(cbk, arglist, npjobs):
             print("\rDone: {}/{}".format(j,nj), end='')
     print("")
 
+def get_feature_target_data(ffiles, tfiles, tzone):
+    l = []
+    for f in ffiles:
+        l.append(read_csv(f, tzone))
+    fdf = pd.concat(l)
 
+    l = []
+    for f in tfiles:
+        l.append(read_csv(f, tzone))
+    tdf = pd.concat(l)
+
+    return np.array(fdf), np.array(tdf)
 

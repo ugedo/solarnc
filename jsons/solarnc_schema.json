@@ -23,23 +23,55 @@
 			},
 			"required": ["name","latitude", "longitude"]
 		},
-		"model": {
+		"Model": {
 			"type": "object",
 			"properties": {
+				"filename": {"type": "string"},
 				"model type": {
-					"type": "string",
-					"enum": ["MLP", "Linear"]
-				},
-				"outpath": {"type": "string"},
-				"hyperparameters": {
-					"type": "object",
-					"properties": {
-						"search method": {"type": "string"}
-					}
+					"type":"string",
+					"enum": ["MLPRegressor","Linear","Ridge"]
 				}
 			},
-			"additionalProperties": false,
-			"required": ["model type", "outpath"]
+			"required": ["model type", "filename"],
+			"allOf": [ {
+				"if": {"properties": {"model type": {"const": "MLPRegressor"}}},
+				"then": {
+					"properties": {
+						"cv": {"type": "number"},
+						"alpha": {
+							"type": "array",
+							"items": {"type": "number", "minItems": 1}
+						},
+						"hidden layers count": {
+							"type": "array",
+							"items": {"type": "number", "minItems": 1}
+						},
+						"hidden layers sizes": {
+							"type": "array",
+							"items": {"type": "number", "minItems": 1}
+						}
+					},
+					"required": ["cv", "alpha", "hidden layers count",
+						"hidden layers sizes"],
+					"additionalProperties": false
+				}},{
+				"if": {"properties": {"model type": {"const": "Linear"}}},
+				"then": {
+					"additionalProperties": false
+				}},{
+				"if": {"properties": {"model type": {"const": "Ridge"}}},
+				"then": {
+					"properties": {
+						"cv": {"type": "number"},
+						"alpha": {
+							"type": "array",
+							"items": {"type": "number", "minItems": 1}
+						}
+					},
+					"required": ["cv","alpha"],
+					"additionalProperties": false
+				}}
+			]
 		}
 	},
 	"properties": {
@@ -163,15 +195,17 @@
 		"train": {
 			"type": "object",
 			"properties": {
+				"outpath": {"type": "string"},
+				"skip existing": {"type": "boolean"},
 				"models": {
 					"type": "array",
 					"items": {
-						"$ref": "#/definitions/model",
+						"$ref": "#/definitions/Model",
 						"minItems": 1
 					}
 				}
 			},
-			"required": ["models"]
+			"required": ["outpath","skip existing","models"]
 		}
 	},
 	"required": ["dataset", "format", "split","fselect", "train"]
