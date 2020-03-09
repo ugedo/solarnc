@@ -95,6 +95,12 @@ def csm_pvlib(df, skip_existing, stations, models, position):
             df[csmcol] = csm(df, model, sta, solpos, pressure, dni_extra)
             df[kcol] = df[ghicol]/df[csmcol].replace({0: np.finfo(float).eps})
             df[kcol] = df[kcol].round(4)
+            # sunrise and sunset give unreasonable high k values
+            # we remove those values and interpolate with the neighbours
+            T = df.index.inferred_freq
+            df.drop(df[df[kcol] > 2].index, inplace=True)
+            df = df.resample(T).interpolate(axis=0)
+    return df
 
 def run_cbk_unpack(tup):
     cbk, argtup = tup
@@ -128,5 +134,5 @@ def get_feature_target_data(ffiles, tfiles, tzone):
         l.append(read_csv(f, tzone))
     tdf = pd.concat(l)
 
-    return np.array(fdf), np.array(tdf)
+    return fdf, tdf
 

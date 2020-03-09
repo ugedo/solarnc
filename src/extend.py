@@ -35,9 +35,9 @@ def add_new_variables(infile, stations, timezone, functions):
         else:
             if 'args' in f:
                 args = tuple(f['args'])
-                fun(df, f['skip existing'], stations, *args)
+                df = fun(df, f['skip existing'], stations, *args)
             else:
-                fun(df, f['skip existing'], stations)
+                df = fun(df, f['skip existing'], stations)
     snc.save_csv(df, infile)
 
 def print_stations(stations):
