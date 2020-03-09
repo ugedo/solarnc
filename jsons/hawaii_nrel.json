@@ -153,7 +153,7 @@
 	},
 	"train": {
 		"outpath": "out_train",
-		"skip existing": false,
+		"skip existing": true,
 		"models": [
 			{
 				"model type": "MLPRegressor",
@@ -168,7 +168,14 @@
 				"filename": "Ridge",
 				"cv": 5,
 				"alpha": [0.001, 0.01, 0.1]
+			},
+			{
+				"model type": "Lasso",
+				"filename": "Lasso",
+				"cv": 5,
+				"alpha": [0.001, 0.01, 0.1]
 			}
+
 		]
 	}
 }

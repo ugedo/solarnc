@@ -80,6 +80,22 @@ def train_Ridge(m, X, Y, logfile, npjobs):
 
     return gs.best_estimator_
 
+def train_Lasso(m, X, Y, logfile, npjobs):
+    alphas = m['alpha']
+    pgrid={'alpha': alphas}
+    if Y.shape[1] == 1:
+        reg = linear_model.LassoCV(cv=m['cv'], random_state=0, \
+                n_jobs=npjobs).fit(X, Y)
+    else:
+        reg = linear_model.MultiTaskLassoCV(cv=m['cv'], random_state=0, \
+                n_jobs=npjobs).fit(X, Y)
+
+    with open(logfile, "w") as logf:
+        logf.write("Searched for alpha values: {}\n".format(alphas))
+        logf.write("Parameters: {}".format(reg.get_params()))
+
+    return reg
+
 def train_model(m, X, Y, outpath, skip, npjobs):
     ofile = "{}/{}.joblib".format(outpath, m['filename'])
     if skip and os.path.exists(ofile):

@@ -29,7 +29,7 @@
 				"filename": {"type": "string"},
 				"model type": {
 					"type":"string",
-					"enum": ["MLPRegressor","Linear","Ridge"]
+					"enum": ["MLPRegressor","Linear","Ridge","Lasso"]
 				}
 			},
 			"required": ["model type", "filename"],
@@ -60,6 +60,18 @@
 					"additionalProperties": false
 				}},{
 				"if": {"properties": {"model type": {"const": "Ridge"}}},
+				"then": {
+					"properties": {
+						"cv": {"type": "number"},
+						"alpha": {
+							"type": "array",
+							"items": {"type": "number", "minItems": 1}
+						}
+					},
+					"required": ["cv","alpha"],
+					"additionalProperties": false
+				}},{
+				"if": {"properties": {"model type": {"const": "Lasso"}}},
 				"then": {
 					"properties": {
 						"cv": {"type": "number"},
