@@ -162,7 +162,7 @@ interval (for example 30min).
 The period property indicates the sampling period considered in the window
 interval. If the original period is smaller (i.e. faster sampling rate), the
 tool will take average values of the original samples (see
-[dataframe.resample!](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html?highlight=resample#pandas.DataFrame.resample)).
+[dataframe.resample](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html?highlight=resample#pandas.DataFrame.resample)).
 
 ### train.py
 
