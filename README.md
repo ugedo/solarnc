@@ -169,7 +169,7 @@ tool will take average values of the original samples (see
 This is the tool that trains one or more models using the feature files
 generated in the feature selection step. In the config file we just specify the
 model name, the name of the output file and the parameters needed for the model.
-For the moment, models should be available in scykitlearn, which is the library
+For the moment, models should be available in scikitlearn, which is the library
 used for training. This may evolve in the future to include other backend
 libraries that support different models.
 
@@ -177,3 +177,23 @@ libraries that support different models.
 
 This tool performs the test phase on the trained models using the test set
 selected in the split phase.
+
+
+## References
+
+- Related papers:
+	- A. Eschenbach et al., "Spatio-Temporal Resolution of Irradiance Samples in
+	  Machine Learning Approaches for Irradiance Forecasting," in IEEE Access,
+	  vol. 8, pp. 51518-51531, 2020, doi: 10.1109/ACCESS.2020.2980775.
+- [Json Schemas!](https://json-schema.org/). Documentation for json schemas.
+- Python libraries used:
+	- [Pandas!](https://pandas.pydata.org/)
+	- [numpy!](https://numpy.org/)
+	- [json!](https://docs.python.org/3/library/json.html)
+	- [scikit-learn!](https://scikit-learn.org/stable/)
+	- [pv-lib!](https://pvlib-python.readthedocs.io/en/stable/)
+	- [multiprocessing!](https://docs.python.org/3/library/multiprocessing.html)
+	- [joblib!](https://joblib.readthedocs.io/en/latest/)
+	- [optparse!](https://docs.python.org/3/library/optparse.html)
+	- [itertools!](https://docs.python.org/3/library/itertools.html<Paste>)
+
