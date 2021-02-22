@@ -4,12 +4,13 @@ This toolset is designed to systematically explore different machine learning
 algorithms for solar irradiation forecasting. Every tool reads a json file as
 input that describes the whole experiment. Each tool processes only the relevant
 entries for the step it has to complete. The goals in the design are:
-	- Take advantage of reapeated steps between different experiments, avoiding
-	  the recomputation of the same data again
-	- Autodocument the experiment. The json file from which we generate the data
-	  enables the replication of the experiment by others.
-	- Be as flexible as possible, so that we can quickly repeat an experiment
-	  in which we only want to change on step, add a new feature, etc.
+
+- Take advantage of reapeated steps between different experiments, avoiding the
+  recomputation of the same data again
+- Autodocument the experiment. The json file from which we generate the data
+  enables the replication of the experiment by others.
+- Be as flexible as possible, so that we can quickly repeat an experiment in
+  which we only want to change on step, add a new feature, etc.
 
 
 ## Phases
@@ -75,20 +76,20 @@ future, if we opt for a better policy to find this json file.
 
 This first tool in the toolset is the only one that needs code provided by the
 user to complete its job. It reads the json file, and extracts two entries:
-	- dataset, that describes the original dataset. This entry should contain
-	  the following fields: name, path, timezone and stations. The latter is a
-	  list of the stations in the dataset. Check the solarnc_schema for more
-	  details.
 
-	- format, the entry that describes what the tool would do. It is basically a
-	  field that is given to the users provided python function. It should
-	  contain the path for the output files and the list of stations that we
-	  want to include (we can remove some of the existing ones if we want to).
-	  It should also contain the python module and the name of the function in
-	  that module that will do the formating. This file should be provided by
-	  the user. As an example, see the file nrelformat, which implements the
-	  format phase for the hawaii_nrel data. It may contain other fields
-	  required for the user's provided module.
+- dataset, that describes the original dataset. This entry should contain the
+  following fields: name, path, timezone and stations. The latter is a list of
+  the stations in the dataset. Check the solarnc_schema for more details.
+
+- format, the entry that describes what the tool would do. It is basically a
+  field that is given to the users provided python function. It should contain
+  the path for the output files and the list of stations that we want to include
+  (we can remove some of the existing ones if we want to).  It should also
+  contain the python module and the name of the function in that module that
+  will do the formating. This file should be provided by the user. As an
+  example, see the file nrelformat, which implements the format phase for the
+  hawaii_nrel data. It may contain other fields required for the user's provided
+  module.
 
 The tool will handle the parsing of the json file and the creation of the
 required directories, before calling the user's provided module.
@@ -117,14 +118,16 @@ should be included in the train set, the rest will be in the test set.
 
 This tools implements the feature selection phase. The model considers two kind
 of features:
-	- station features: these correspond to variables from each station
-	- non-station features: correspond to individual columns added to the data
-	  set, generally with exogenous data.
+
+- station features: these correspond to variables from each station
+- non-station features: correspond to individual columns added to the data set,
+  generally with exogenous data.
 
 In addition, these features are divided in two groups:
-	- lagged: the model will include lagged samples of these variables with the
-	  period indicated in the fselect entry of the configuration file.
-	- unlagged: only one value from these variables will be used as feature
+
+- lagged: the model will include lagged samples of these variables with the
+  period indicated in the fselect entry of the configuration file.
+- unlagged: only one value from these variables will be used as feature
 
 As an example, the normalized irradiance measured at each station would be a
 station lagged feature, and the normalized elevation and azimuth would be
@@ -137,10 +140,14 @@ sampling period, a window, a set of features and a forecasting target. The
 latter consists of a variable to be forecasted, a list of stations for which we
 want to forecast, a forecating horizon and a forecasting interval: at instant t
 the model will forecast the mean irradiance value in the interval:
+
 		[min(t1, t2), max(t1, t2)]
+
 where:
+
 		t1 = t + horizon
 		t2 = t + horizon + interval
+
 If the interval is negative the model will be trained to predict the average
 irradiance in an interval that ends at the forecasting horizon, while if it is
 positive the forecasting horizon will establish the start of the forecasting
