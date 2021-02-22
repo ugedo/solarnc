@@ -82,7 +82,6 @@ def train_Ridge(m, X, Y, logfile, npjobs):
 
 def train_Lasso(m, X, Y, logfile, npjobs):
     alphas = m['alpha']
-    pgrid={'alpha': alphas}
     if Y.shape[1] == 1:
         reg = linear_model.LassoCV(cv=m['cv'], random_state=0, \
                 n_jobs=npjobs).fit(X, Y)
@@ -95,6 +94,36 @@ def train_Lasso(m, X, Y, logfile, npjobs):
         logf.write("Parameters: {}".format(reg.get_params()))
 
     return reg
+
+def train_ElasticNet(m, X, Y, logfile, npjobs):
+    alphas = m['alpha']
+    l1_ratios = m['l1_ratio']
+    if Y.shape[1] == 1:
+        reg = linear_model.ElasticNetCV(cv=m['cv'], l1_ratio=l1_ratios, \
+                n_jobs=npjobs).fit(X, Y)
+    else:
+        reg = linear_model.MultiTaskElasticNetCV(cv=m['cv'], \
+                l1_ratio=l1_ratios, n_jobs=npjobs).fit(X, Y)
+
+    with open(logfile, "w") as logf:
+        logf.write("Searched for alpha values: {}\n".format(alphas))
+        logf.write("Parameters: {}".format(reg.get_params()))
+
+    return reg
+
+def train_LARS(m, X, Y, logfile, npjobs):
+    alphas = m['alpha']
+    pgrid={'alpha': alphas}
+    reg = linear_model.LassoLars()
+    gs = GridSearchCV(reg, param_grid = pgrid, \
+            scoring='neg_mean_squared_error', n_jobs=npjobs, cv = m['cv'])
+    gs.fit(X,Y)
+
+    with open(logfile, "w") as logf:
+        logf.write("Searched for alpha values: {}\n".format(alphas))
+        log_gridsearch(gs, logf)
+
+    return gs.best_estimator_
 
 def train_model(m, X, Y, outpath, skip, npjobs):
     ofile = "{}/{}.joblib".format(outpath, m['filename'])
