@@ -184,16 +184,17 @@ selected in the split phase.
 - Related papers:
 	- A. Eschenbach et al., "Spatio-Temporal Resolution of Irradiance Samples in
 	  Machine Learning Approaches for Irradiance Forecasting," in IEEE Access,
-	  vol. 8, pp. 51518-51531, 2020, doi: 10.1109/ACCESS.2020.2980775.
-- [Json Schemas!](https://json-schema.org/). Documentation for json schemas.
+	  vol. 8, pp. 51518-51531, 2020, doi:
+	  [10.1109/ACCESS.2020.2980775](https://doi.org/10.1109/ACCESS.2020.2980775).
+- [Json Schemas](https://json-schema.org/). Documentation for json schemas.
 - Python libraries used:
-	- [Pandas!](https://pandas.pydata.org/)
-	- [numpy!](https://numpy.org/)
-	- [json!](https://docs.python.org/3/library/json.html)
-	- [scikit-learn!](https://scikit-learn.org/stable/)
-	- [pv-lib!](https://pvlib-python.readthedocs.io/en/stable/)
-	- [multiprocessing!](https://docs.python.org/3/library/multiprocessing.html)
-	- [joblib!](https://joblib.readthedocs.io/en/latest/)
-	- [optparse!](https://docs.python.org/3/library/optparse.html)
-	- [itertools!](https://docs.python.org/3/library/itertools.html<Paste>)
+	- [Pandas](https://pandas.pydata.org/)
+	- [numpy](https://numpy.org/)
+	- [json](https://docs.python.org/3/library/json.html)
+	- [scikit-learn](https://scikit-learn.org/stable/)
+	- [pv-lib](https://pvlib-python.readthedocs.io/en/stable/)
+	- [multiprocessing](https://docs.python.org/3/library/multiprocessing.html)
+	- [joblib](https://joblib.readthedocs.io/en/latest/)
+	- [optparse](https://docs.python.org/3/library/optparse.html)
+	- [itertools](https://docs.python.org/3/library/itertools.html<Paste>)
 
