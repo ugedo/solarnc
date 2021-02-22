@@ -29,7 +29,8 @@
 				"filename": {"type": "string"},
 				"model type": {
 					"type":"string",
-					"enum": ["MLPRegressor","Linear","Ridge","Lasso"]
+					"enum": ["MLPRegressor","Linear","Ridge","Lasso",
+						"ElasticNet", "LARS"]
 				}
 			},
 			"required": ["model type", "filename"],
@@ -72,6 +73,34 @@
 					"additionalProperties": false
 				}},{
 				"if": {"properties": {"model type": {"const": "Lasso"}}},
+				"then": {
+					"properties": {
+						"cv": {"type": "number"},
+						"alpha": {
+							"type": "array",
+							"items": {"type": "number", "minItems": 1}
+						}
+					},
+					"required": ["cv","alpha"],
+					"additionalProperties": false
+				}},{
+				"if": {"properties": {"model type": {"const": "ElasticNet"}}},
+				"then": {
+					"properties": {
+						"cv": {"type": "number"},
+						"alpha": {
+							"type": "array",
+							"items": {"type": "number", "minItems": 1}
+						},
+						"l1_ratio": {
+							"type": "array",
+							"items": {"type": "number", "minItems": 1}
+						}
+					},
+					"required": ["cv","alpha","l1_ratio"],
+					"additionalProperties": false
+				}},{
+				"if": {"properties": {"model type": {"const": "LARS"}}},
 				"then": {
 					"properties": {
 						"cv": {"type": "number"},
