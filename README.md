@@ -52,7 +52,7 @@ input cvs (a day of data). The corresponding features.cvs contains the rows of
 the X matrix for that day, while the rows of the corresponding targets.cvs
 contain the elements of Y.
 
-The Train phase performs the training of one or more algorithms (the *f* 
+The Train phase performs the training of one or more algorithms (the f 
 function int the mathematical expression of the previous paragraph) on the days
 selected as training days in the split phase.
 
