@@ -43,7 +43,7 @@ The Split phase generates two files, one for the train phase and one for the
 test phase. The split is performed selecting complete days for each set.
 
 The Feature Selection phase selects the features for the machine learning
-algorithm, which very generally can be expressed as $Y = f(X)$, where Y is a
+algorithm, which very generally can be expressed as Y = f(X), where Y is a
 vector in which each sample is a prediction (it can contain several columns if
 we have several forecasting horizons), and X is a matrix in which each row
 contains the features needed to compute the prediction of the corresponding
@@ -52,7 +52,7 @@ input cvs (a day of data). The corresponding features.cvs contains the rows of
 the X matrix for that day, while the rows of the corresponding targets.cvs
 contain the elements of Y.
 
-The Train phase performs the training of one or more algorithms (the *f*
+The Train phase performs the training of one or more algorithms (the *f* 
 function int the mathematical expression of the previous paragraph) on the days
 selected as training days in the split phase.
 
