@@ -17,12 +17,13 @@ entries for the step it has to complete. The goals in the design are:
 
 The experiments are organized in the following phases, for which and independent
 tool has been designed:
-	1. Format
-	2. Extend
-	3. Split
-	4. Feature selection
-	5. Train
-	6. Test
+
+1. Format
+2. Extend
+3. Split
+4. Feature selection
+5. Train
+6. Test
 
 The Format phase is used to process the raw input data from a given database and
 generate the files with the format that the rest of the phases expect: one cvs
