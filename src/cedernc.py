@@ -28,11 +28,22 @@ if __name__ == '__main__':
         with open(fechas[d], 'r') as f:
             sensors = []
             for linea in f:
-                sensors.append(linea)
-        for s in sensors:
+                sensors.append(str.rstrip(linea))
+        for i, s in enumerate(sensors):
             df = pd.read_csv(s, header=[1, 2, 3])
             df = df.iloc[:, [0, 3]]
-            print(df.to_string(header=False, index=False))
-            # TODO extraer el segundo, año, dia juliano y tercer parámetro (descubrir qué es)
-            # TODO añadir a cada fila los distintos datos de cada sensor
-            # TODO exportar a un txt como CSV
+            df[["TIMESTAMP"]] = df[["TIMESTAMP"]].astype(np.datetime64)
+            df[('Sec', 'Sec', 'Sec')] = df.apply(lambda x: x[df.columns[0]].minute, axis=1)
+            df[('Year', 'Year', 'Year')] = df.apply(lambda x: x[df.columns[0]].year, axis=1)
+            df[('DJ', 'DJ', 'DJ')] = df.apply(lambda x: x[df.columns[0]].dayofyear, axis=1)
+            df.drop(columns=["TIMESTAMP"], level=0, inplace=True)
+            col = df.columns
+            df = df.reindex(columns=[col[1], col[2], col[3], col[0]], copy=False)
+            # TODO preguntar qué es el tercer parámetro de los .txt de raw e incluir.
+            if 'df_out' not in locals():
+                df_out = df
+            else:
+                sensor = 'Sen' + str(i)
+                df_out[(sensor, sensor, sensor)] = df[df.columns[-1]]
+        o = os.path.dirname(fechas[d]) + '/raw/' + d + '.txt'
+        df_out.to_csv(o, header=False, index=False)
