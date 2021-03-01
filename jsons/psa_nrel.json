@@ -1,0 +1,127 @@
+{
+	"dataset": {
+		"name": "PSA NREL",
+		"path": "infiles/psa",
+		"timezone": "UTC",
+		"stations": [
+			{
+				"name": "CESA NORTE",
+				"latitude": -2.36121,
+				"longitude": 37.09866,
+				"MASL": 509
+			},
+			{
+				"name": "CESA SUR",
+				"latitude": -2.36138,
+				"longitude": 37.09456,
+				"MASL": 503
+			},
+			{
+				"name": "PROMETEO",
+				"latitude": -2.3543,
+				"longitude": 37.09737,
+				"MASL": 518
+			},
+			{
+				"name": "CRS",
+				"latitude": -2.35614,
+				"longitude": 37.09333,
+				"MASL": 512
+			},
+			{
+				"name": "DESALACION",
+				"latitude": -2.3546,
+				"longitude": 37.09335,
+				"MASL": 501
+			},
+			{
+				"name": "NEW METEO",
+				"latitude": -2.35724,
+				"longitude": 37.0913,
+				"MASL": 499
+			},
+			{
+				"name": "HORNO",
+				"latitude": -2.35841,
+				"longitude": 37.0932,
+				"MASL": 502.712
+			},
+			{
+				"name": "METAS",
+				"latitude": -2.36355,
+				"longitude": 37.09157,
+				"MASL": 496
+			}
+		]
+	},
+	"format": {
+		"outpath": "out_format/psa/",
+		"stations": ["CESA NORTE", "CESA SUR", "PROMETEO", "CRS",
+			"DESALACION", "NEW METEO", "HORNO", "METAS"],
+		"module": "psa_nrel",
+		"fname": "nrelformat",
+		"rejectpath": "out_format/psa/reject",
+		"skip existing": false
+	}/*,
+	"extend": {
+		"functions": [
+			{
+				"skip existing": false,
+				"module": "solarnc",
+				"fname": "csm_pvlib",
+				"args": [["haurwitz","ineichen","simplified_solis"],true]
+			}
+		]
+	},
+	"split": {
+		"outpath": "out_split",
+		"method" : {
+			"name": "random",
+			"args": {"train": 70}
+		}
+	},
+	"fselect": {
+		"outpath": "out_fselect/",
+		"period": "5min",
+		"window": "1h",
+		"features": {
+			"station lagged": ["K_haurwitz"],
+			"station unlagged": ["nelevation","nazimuth"],
+			"lagged": [],
+			"unlagged": []
+		},
+		"forecasting target": {
+			"variable": "K_haurwitz",
+			"stations": ["DH3", "DH4"],
+			"horizon": "15min",
+			"interval": "-15min"
+		}
+	},
+	"train": {
+		"outpath": "out_train",
+		"skip existing": true,
+		"models": [
+			{
+				"model type": "MLPRegressor",
+				"filename": "MLP",
+				"cv": 5,
+				"alpha": [0.01],
+				"hidden layers count": [3],
+				"hidden layers sizes": [10, 100]
+			},
+			{
+				"model type": "Ridge",
+				"filename": "Ridge",
+				"cv": 5,
+				"alpha": [0.001, 0.01, 0.1]
+			},
+			{
+				"model type": "Lasso",
+				"filename": "Lasso",
+				"cv": 5,
+				"alpha": [0.001, 0.01, 0.1]
+			}
+
+		]
+	}*/
+}
