@@ -1,7 +1,7 @@
 {
 	"dataset": {
 		"name": "PSA NREL",
-		"path": "infiles/psa",
+		"path": "infiles/psa/raw",
 		"timezone": "UTC",
 		"stations": [
 			{
