@@ -39,7 +39,7 @@ if __name__ == '__main__':
             df.drop(columns=["TIMESTAMP"], level=0, inplace=True)
             col = df.columns
             df = df.reindex(columns=[col[1], col[2], col[3], col[0]], copy=False)
-            # TODO preguntar qué es el tercer parámetro de los .txt de raw e incluir.
+            # TODO preguntar qué es el cuarto parámetro de los .txt de raw e incluir. (HST hhmm)
             if 'df_out' not in locals():
                 df_out = df
             else:

@@ -13,12 +13,13 @@ data_columns = ["TIMESTAMP",
                 "CESA SUR",
                 "PROMETEO",
                 "CRS",
-			    "DESALACION",
+                "DESALACION",
                 "NEW METEO",
                 "HORNO",
                 "METAS"]
 
-def format_data(infile,outpath, ghi_columns, rejectpath):
+
+def format_data(infile, outpath, ghi_columns, rejectpath):
     base = os.path.basename(infile)
     day = os.path.splitext(base)[0]
     df = pd.read_csv(infile, header=None, names=data_columns)
@@ -38,10 +39,11 @@ def format_data(infile,outpath, ghi_columns, rejectpath):
     else:
         snc.save_csv(df, "{}/{}.csv".format(outpath, day))
 
+
 def nrelformat(dtset, fconfig, npjobs):
     path = dtset['path']
     print("Input files:")
-    infiles  = glob.glob("{}/*.txt".format(path))
+    infiles = glob.glob("{}/*.txt".format(path))
     print(infiles)
 
     outpath = fconfig['outpath']
