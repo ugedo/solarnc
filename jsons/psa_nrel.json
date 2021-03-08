@@ -54,6 +54,13 @@
 			}
 		]
 	},
+	"rawer": {
+		"inpath": "C:/PSA/",
+		"outpath": "infiles/psa/raw",
+		"stations": ["CESA NORTE", "CESA SUR", "PROMETEO", "CRS",
+			"DESALACION", "NEW METEO", "HORNO", "METAS"],
+		"module": "psa_rawer"
+	},
 	"format": {
 		"outpath": "out_format/psa/",
 		"stations": ["CESA NORTE", "CESA SUR", "PROMETEO", "CRS",
@@ -62,7 +69,7 @@
 		"fname": "nrelformat",
 		"rejectpath": "out_format/psa/reject",
 		"skip existing": false
-	}/*,
+	},
 	"extend": {
 		"functions": [
 			{
@@ -96,32 +103,5 @@
 			"horizon": "15min",
 			"interval": "-15min"
 		}
-	},
-	"train": {
-		"outpath": "out_train",
-		"skip existing": true,
-		"models": [
-			{
-				"model type": "MLPRegressor",
-				"filename": "MLP",
-				"cv": 5,
-				"alpha": [0.01],
-				"hidden layers count": [3],
-				"hidden layers sizes": [10, 100]
-			},
-			{
-				"model type": "Ridge",
-				"filename": "Ridge",
-				"cv": 5,
-				"alpha": [0.001, 0.01, 0.1]
-			},
-			{
-				"model type": "Lasso",
-				"filename": "Lasso",
-				"cv": 5,
-				"alpha": [0.001, 0.01, 0.1]
-			}
-
-		]
-	}*/
+	}
 }

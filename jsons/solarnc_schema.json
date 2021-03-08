@@ -220,5 +220,5 @@
 			"required": ["outpath","skip existing","models"]
 		}
 	},
-	"required": ["dataset", "format", "split","fselect", "train"]
+	"required": ["dataset", "format"]
 }
