@@ -5,13 +5,13 @@
 		"timezone": "UTC",
 		"stations": [
 			{
-				"name": "CESA NORTE",
+				"name": "CESA_NORTE",
 				"latitude": -2.36121,
 				"longitude": 37.09866,
 				"MASL": 509
 			},
 			{
-				"name": "CESA SUR",
+				"name": "CESA_SUR",
 				"latitude": -2.36138,
 				"longitude": 37.09456,
 				"MASL": 503
@@ -35,7 +35,7 @@
 				"MASL": 501
 			},
 			{
-				"name": "NEW METEO",
+				"name": "NEW_METEO",
 				"latitude": -2.35724,
 				"longitude": 37.0913,
 				"MASL": 499
@@ -57,14 +57,14 @@
 	"rawer": {
 		"inpath": "C:/PSA/",
 		"outpath": "infiles/psa/raw",
-		"stations": ["CESA NORTE", "CESA SUR", "PROMETEO", "CRS",
-			"DESALACION", "NEW METEO", "HORNO", "METAS"],
+		"stations": ["CESA_NORTE", "CESA_SUR", "PROMETEO", "CRS",
+			"DESALACION", "NEW_METEO", "HORNO", "METAS"],
 		"module": "psa_rawer"
 	},
 	"format": {
 		"outpath": "out_format/psa/",
-		"stations": ["CESA NORTE", "CESA SUR", "PROMETEO", "CRS",
-			"DESALACION", "NEW METEO", "HORNO", "METAS"],
+		"stations": ["CESA_NORTE", "CESA_SUR", "PROMETEO", "CRS",
+			"DESALACION", "NEW_METEO", "HORNO", "METAS"],
 		"module": "psa_nrel",
 		"fname": "nrelformat",
 		"rejectpath": "out_format/psa/reject",

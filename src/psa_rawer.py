@@ -55,29 +55,32 @@ def main(options, args):
     current_file = os.path.realpath(__file__)
     schema_path = os.path.dirname(current_file)
     schema_fname = "{}/../jsons/solarnc_schema.json".format(schema_path)
-    infiles = glob.glob("{}/{}/Minutos/*.dat".format(path, stations[2]))
-    fechas = {}
-    for i, f in enumerate(infiles):
-        name = f.split('_')
-        try:
-            name[4] = '0' + name[4] if int(name[4]) < 10 else name[4]
-            name[3] = '0' + name[3] if int(name[3]) < 10 else name[3]
-            fecha = np.datetime64(name[2] + '-' + name[3] + '-' + name[4])
-            # fecha = name[2] + '-' + name[3] + '-' + name[4]
-        except:
-            print('Nombre de fichero incorrecto en la posición ', i, ':\n    -x ' + f)
-            # Codifico el error para el log. error 1, posición de ocurrencia, nombre
-            print(1, i, f, file=flog, sep=',')
-        else:
-            if fecha not in fechas:
-                fechas[fecha] = f
+    for s in stations:
+        infiles = glob.glob("{}/{}/Minutos/*.dat".format(path, s))
+        fechas = {}
+        for i, f in enumerate(infiles):
+            name = os.path.basename(f).split('_')
+            try:
+                name[-3] = '0' + name[-3] if int(name[-3]) < 10 else name[-3]
+                name[-4] = '0' + name[-4] if int(name[-4]) < 10 else name[-4]
+                fecha = np.datetime64(name[-5] + '-' + name[-4] + '-' + name[-3])
+                # fecha = name[2] + '-' + name[3] + '-' + name[4]
+            except:
+                print('Nombre de fichero incorrecto en la posición ', i, ':\n    -x ' + f)
+                # Codifico el error para el log. error 1, posición de ocurrencia, nombre
+                print(1, i, f, file=flog, sep=',')
             else:
-                print('Se han encontrado ficheros duplicadaos en la posición ', i,
-                      ':\n    -x ' + f + '\n    -> ' + fechas[fecha])
-                print(2, i, f, file=flog, sep=',')
-    ordenadas = sorted(fechas)
-    fecha = ordenadas[0] + np.timedelta64(0, 'm')
-    fecha_fin = np.datetime64(ordenadas[-1] + 1) - np.timedelta64(1, 'm')
+                if fecha not in fechas:
+                    fechas[fecha] = f
+                else:
+                    print('Se han encontrado ficheros duplicadaos en la posición ', i,
+                          ':\n    -x ' + f + '\n    -> ' + fechas[fecha])
+                    print(2, i, f, file=flog, sep=',')
+        minima = min(fechas) if 'minima' not in locals() else min(min(fechas), minima)
+        maxima = max(fechas) if 'maxima' not in locals() else max(max(fechas), maxima)
+        # ordenadas = sorted(fechas)
+    fecha = minima + np.timedelta64(0, 'm')
+    fecha_fin = np.datetime64(maxima + 1) - np.timedelta64(1, 'm')
     ffechas = os.path.dirname(os.path.realpath(__file__)) + "/../logs/" + 'fechas.txt'
     ffechas = open(ffechas, 'w')
     while fecha <= fecha_fin:
