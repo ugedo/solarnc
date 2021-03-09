@@ -55,37 +55,40 @@ def main(options, args):
     current_file = os.path.realpath(__file__)
     schema_path = os.path.dirname(current_file)
     schema_fname = "{}/../jsons/solarnc_schema.json".format(schema_path)
+    fechas = {}
     for s in stations:
         infiles = glob.glob("{}/{}/Minutos/*.dat".format(path, s))
-        fechas = {}
+        fechas[s] = {}
         for i, f in enumerate(infiles):
             name = os.path.basename(f).split('_')
+            a = len(s.split('_')) + 1
             try:
-                name[-3] = '0' + name[-3] if int(name[-3]) < 10 else name[-3]
-                name[-4] = '0' + name[-4] if int(name[-4]) < 10 else name[-4]
-                fecha = np.datetime64(name[-5] + '-' + name[-4] + '-' + name[-3])
+                name[a+2] = name[a+2].split('.')[0]
+                name[a+2] = '0' + name[a+2] if len(name[a+2]) < 2 else name[a+2]
+                name[a+1] = '0' + name[a+1] if len(name[a+1]) < 2 else name[a+1]
+                fecha = np.datetime64(name[a] + '-' + name[a+1] + '-' + name[a+2])
                 # fecha = name[2] + '-' + name[3] + '-' + name[4]
             except:
                 print('Nombre de fichero incorrecto en la posición ', i, ':\n    -x ' + f)
                 # Codifico el error para el log. error 1, posición de ocurrencia, nombre
                 print(1, i, f, file=flog, sep=',')
             else:
-                if fecha not in fechas:
-                    fechas[fecha] = f
+                if fecha not in fechas[s]:
+                    fechas[s][fecha] = f
                 else:
                     print('Se han encontrado ficheros duplicadaos en la posición ', i,
-                          ':\n    -x ' + f + '\n    -> ' + fechas[fecha])
-                    print(2, i, f, file=flog, sep=',')
-        minima = min(fechas) if 'minima' not in locals() else min(min(fechas), minima)
-        maxima = max(fechas) if 'maxima' not in locals() else max(max(fechas), maxima)
+                          ':\n    -x ' + f + '\n    -> ' + fechas[s][fecha])
+                    print(2, i, f, fechas[s][fecha], file=flog, sep=',')
+        minima = min(fechas[s]) if 'minima' not in locals() else min(min(fechas[s]), minima)
+        maxima = max(fechas[s]) if 'maxima' not in locals() else max(max(fechas[s]), maxima)
         # ordenadas = sorted(fechas)
-    fecha = minima + np.timedelta64(0, 'm')
+    fecha_i = minima + np.timedelta64(0, 'm')
     fecha_fin = np.datetime64(maxima + 1) - np.timedelta64(1, 'm')
     ffechas = os.path.dirname(os.path.realpath(__file__)) + "/../logs/" + 'fechas.txt'
     ffechas = open(ffechas, 'w')
-    while fecha <= fecha_fin:
-        print(fecha, file=ffechas)
-        fecha += np.timedelta64(1, 'm')
+    while fecha_i <= fecha_fin:
+        print(fecha_i, file=ffechas)
+        fecha_i += np.timedelta64(1, 'm')
         # TODO obtener los datos de esa marca temporal para cada una de las estaciones, incrementar en minutos
 
     flog.close()
