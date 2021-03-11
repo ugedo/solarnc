@@ -58,63 +58,47 @@ def main(options, args):
     if not os.path.exists(os.path.dirname(flog)):
         os.makedirs(flog)
     flog = open(flog, 'w')
+    print('Loging...')
+    print('0', datetime.now().strftime('%H:%M:%S.%f'), file=flog, sep=',')
 
     # Se crea diccionario de fechas asociando la estación, fecha y fichero (de datos de esa estación para esa fecha)
-    fechas = {}
     df_stations = {}
+    print('Reading stantions data', end='')
     for s in stations:
         infiles = glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s))
-        fechas[s] = {}
-        for i, f in enumerate(infiles):
-            name = os.path.basename(f).split('_')
-            a = len(s.split('_')) + 1
-            try:
-                name[a+2] = name[a+2].split('.')[0]
-                name[a+2] = '0' + name[a+2] if len(name[a+2]) < 2 else name[a+2]
-                name[a+1] = '0' + name[a+1] if len(name[a+1]) < 2 else name[a+1]
-                fecha = np.datetime64(name[a] + '-' + name[a+1] + '-' + name[a+2])
-                # fecha = name[2] + '-' + name[3] + '-' + name[4]
-            except:
-                print('Nombre de fichero incorrecto en la posición ', i, ':\n    -x ' + f, file=sys.stderr)
-                # Codifico el error para el log. error 1, posición de ocurrencia, nombre
-                print(1, i, f, file=flog, sep=',')
-            else:
-                if fecha not in fechas[s]:
-                    fechas[s][fecha] = f
-                else:
-                    print('Se han encontrado ficheros duplicadaos en la posición ', i,
-                          ':\n    -x ' + f + '\n    -> ' + fechas[s][fecha], file=sys.stderr)
-                    print(2, i, f, fechas[s][fecha], file=flog, sep=',')
 
-        # Se obtiene fecha comienzo de la muestra de datos
-        minima = min(fechas[s]) if 'minima' not in locals() else min(min(fechas[s]), minima)
-        maxima = max(fechas[s]) if 'maxima' not in locals() else max(max(fechas[s]), maxima)
-
-        # ordenadas = sorted(fechas[s]) # en verdad no tendría por qué hacer falta que estén ordenadas.
-        # TODO que añadir la opción de que para un mismo día exista más de un fichero
-        for d in fechas[s]:
-            df = snc.read_csv(fechas[s][d], [1, 2, 3])
+        # DONE añadir la opción de que para un mismo día exista más de un fichero
+        for d in infiles:
+            df = snc.read_csv(d, [1, 2, 3])
             if s not in df_stations:
                 columnas = df.columns
                 df_stations[s] = pd.DataFrame(columns=columnas)
             df_stations[s] = pd.concat([df_stations[s], df])
 
+        # Se obtiene fecha comienzo de la muestra de datos de la estación
+        print('Acotando las fechas de la muestra...')
+        minima = min(df_stations[s].index) if 'minima' not in locals() else min(min(df_stations[s].index), minima)
+        maxima = max(df_stations[s].index) if 'maxima' not in locals() else max(max(df_stations[s].index), maxima)
+
     # Se crea variable a las 0:00 del día inicio de la muestra a las 0:00 y final a las 23:59
-    fecha_i = minima + np.timedelta64(0, 'm')
-    fecha_fin = np.datetime64(maxima + 1) - np.timedelta64(1, 'm')
+    fecha_i = minima# + np.timedelta64(0, 'm')
+    fecha_fin = maxima #np.datetime64(maxima + 1) - np.timedelta64(1, 'm')
     ffechas = os.path.dirname(os.path.realpath(__file__)) + "/../logs/" + 'fechas.txt'
     ffechas = open(ffechas, 'w')
     df = df_stations['METAS']
     # df.set_index(columnas[0], inplace=True)
+    print('Recopilando datos minutales')
     while fecha_i <= fecha_fin:
         try:
             esta = df.loc[fecha_i]
         except:
             print(3, fecha_i, file=flog, sep=',')
+            print('Error en la fecha ', fecha_i, file=sys.stderr)
         #        print(fecha_i, file=ffechas)
         fecha_i += np.timedelta64(1, 'm')
         # TODO obtener los datos de esa marca temporal para cada una de las estaciones, incrementar en minutos
 
+    print('0', datetime.now().strftime('%H:%M:%S.%f'), file=flog, sep=',')
     flog.close()
     ffechas.close()
 
