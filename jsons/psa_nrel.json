@@ -1,7 +1,7 @@
 {
 	"dataset": {
 		"name": "PSA NREL",
-		"path": "infiles/psa/raw",
+		"path": "data/PSA/raw",
 		"timezone": "UTC",
 		"stations": [
 			{
@@ -55,8 +55,8 @@
 		]
 	},
 	"rawer": {
-		"inpath": "C:/PSA/",
-		"outpath": "infiles/psa/raw",
+		"inpath": "data/PSA/",
+		"outpath": "data/PSA/raw",
 		"stations": ["CESA_NORTE", "CESA_SUR", "PROMETEO", "CRS",
 			"DESALACION", "NEW_METEO", "HORNO", "METAS"],
 		"module": "psa_rawer"
