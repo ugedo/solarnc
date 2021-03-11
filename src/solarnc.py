@@ -25,9 +25,9 @@ def read_csv(infile, tzone):
     return df
 
 
-def read_csv(infile, tzone, header):
+def read_csv(infile, header):
     df = pd.read_csv(infile, header=header, index_col=0, parse_dates=True)
-    df.index = df.index.tz_localize('UTC').tz_convert(tzone)
+    # df.index = df.index.tz_localize('UTC').tz_convert(tzone)
     return df
 
 def save_csv(df, outfile):

@@ -48,19 +48,22 @@ def main(options, args):
     print("Selected stations:")
     print(stations)
 
-    # TODO obtener fecha comienzo de la muestra de datos, crear variable a las 0:00 de ese día
-    flog = datetime.now()
-    flog = os.path.dirname(os.path.realpath(__file__)) + "/../logs/" + flog.strftime('%Y-%m-%d_%H%M') + '.txt'
-    if not os.path.exists(os.path.dirname(flog)):
-        os.makedirs(flog)
-    flog = open(flog, 'w')
     current_file = os.path.realpath(__file__)
     schema_path = os.path.dirname(current_file)
     schema_fname = "{}/../jsons/solarnc_schema.json".format(schema_path)
+
+    # Se crea y abre fichero de log
+    flog = datetime.now()
+    flog = os.path.dirname(current_file) + "/../logs/" + flog.strftime('%Y-%m-%d_%H%M') + '.txt'
+    if not os.path.exists(os.path.dirname(flog)):
+        os.makedirs(flog)
+    flog = open(flog, 'w')
+
+    # Se crea diccionario de fechas asociando la estación, fecha y fichero (de datos de esa estación para esa fecha)
     fechas = {}
     df_stations = {}
     for s in stations:
-        infiles = glob.glob("{}/{}/Minutos/*.dat".format(path, s))
+        infiles = glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s))
         fechas[s] = {}
         for i, f in enumerate(infiles):
             name = os.path.basename(f).split('_')
@@ -82,18 +85,21 @@ def main(options, args):
                     print('Se han encontrado ficheros duplicadaos en la posición ', i,
                           ':\n    -x ' + f + '\n    -> ' + fechas[s][fecha], file=sys.stderr)
                     print(2, i, f, fechas[s][fecha], file=flog, sep=',')
+
+        # Se obtiene fecha comienzo de la muestra de datos
         minima = min(fechas[s]) if 'minima' not in locals() else min(min(fechas[s]), minima)
         maxima = max(fechas[s]) if 'maxima' not in locals() else max(max(fechas[s]), maxima)
 
-        ordenadas = sorted(fechas[s]) # en verdad no tendría por qué hacer falta que estén ordenadas.
-        # se tiene que añadir la opción de que para un mismo día exista más de un fichero
-        for d in ordenadas:
-            df = snc.read_csv(fechas[s][d], dtset['timezone'], [1, 2, 3])
+        # ordenadas = sorted(fechas[s]) # en verdad no tendría por qué hacer falta que estén ordenadas.
+        # TODO que añadir la opción de que para un mismo día exista más de un fichero
+        for d in fechas[s]:
+            df = snc.read_csv(fechas[s][d], [1, 2, 3])
             if s not in df_stations:
                 columnas = df.columns
                 df_stations[s] = pd.DataFrame(columns=columnas)
             df_stations[s] = pd.concat([df_stations[s], df])
 
+    # Se crea variable a las 0:00 del día inicio de la muestra a las 0:00 y final a las 23:59
     fecha_i = minima + np.timedelta64(0, 'm')
     fecha_fin = np.datetime64(maxima + 1) - np.timedelta64(1, 'm')
     ffechas = os.path.dirname(os.path.realpath(__file__)) + "/../logs/" + 'fechas.txt'
