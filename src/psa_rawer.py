@@ -73,8 +73,18 @@ def main(options, args):
         for d in infiles[s]:
             df = snc.read_csv(d, [1, 2, 3])
             df = df[df[('Elevacion', 'deg', 'Avg')] > 7]
-            horasluz[0].append(min(df.index))
-            horasluz[1].append(max(df.index))
+            amanecer = min(df.index)
+            ocaso = max(df.index)
+            horasluz[0].append(amanecer)
+            horasluz[1].append(ocaso)
+            if df.loc[amanecer][('Elevacion', 'deg', 'Avg')] > 7.2 or \
+                    df.loc[ocaso][('Elevacion', 'deg', 'Avg')] > 7.2:
+                print(5, amanecer, ocaso, file=flog, sep=',')
+                print('Error en amanecer/ocaso', amanecer, ocaso, file=sys.stderr)
+
+            # primeramanecer = df_stations['METAS'][df_stations['METAS'].index < np.datetime64('2018-01-01 10:00:00')][('Elevacion', 'deg', 'Avg')][0]
+            # df_stations['METAS'][(df_stations['METAS'].index < np.datetime64('2019-01-01 10:00:00')) & (df_stations['METAS'].index > np.datetime64('2019-01-01 07:00:00'))][('Elevacion', 'deg', 'Avg')][0]
+
             if s not in df_stations:
                 columnas = df.columns
                 df_stations[s] = pd.DataFrame(columns=columnas)
@@ -102,7 +112,7 @@ def main(options, args):
                 fecha_i = horasluz[0][horasluz[1].index(fecha_i - np.timedelta64(1, 'm')) + 1]
             else:
                 print(4, fecha_i, file=flog, sep=',')
-                print('Error en la hora ', fecha_i, file=sys.stderr)
+                print('Error en la hora', fecha_i, file=sys.stderr)
         fecha_i += np.timedelta64(1, 'm')
         # TODO obtener los datos de esa marca temporal para cada una de las estaciones, incrementar en minutos
 
