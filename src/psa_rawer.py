@@ -63,13 +63,18 @@ def main(options, args):
 
     # Se crea diccionario de fechas asociando la estación, fecha y fichero (de datos de esa estación para esa fecha)
     df_stations = {}
-    print('Reading stantions data', end='')
+    infiles = {}
+    horasluz = ([], [])
+    print('Reading stantions data')
     for s in stations:
-        infiles = glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s))
+        infiles[s] = glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s))
 
         # DONE añadir la opción de que para un mismo día exista más de un fichero
-        for d in infiles:
+        for d in infiles[s]:
             df = snc.read_csv(d, [1, 2, 3])
+            df = df[df[('Elevacion', 'deg', 'Avg')] > 7]
+            horasluz[0].append(min(df.index))
+            horasluz[1].append(max(df.index))
             if s not in df_stations:
                 columnas = df.columns
                 df_stations[s] = pd.DataFrame(columns=columnas)
@@ -80,6 +85,9 @@ def main(options, args):
         minima = min(df_stations[s].index) if 'minima' not in locals() else min(min(df_stations[s].index), minima)
         maxima = max(df_stations[s].index) if 'maxima' not in locals() else max(max(df_stations[s].index), maxima)
 
+    horasluz[0].sort()
+    horasluz[1].sort()
+
     # Se crea variable a las 0:00 del día inicio de la muestra a las 0:00 y final a las 23:59
     fecha_i = minima# + np.timedelta64(0, 'm')
     fecha_fin = maxima #np.datetime64(maxima + 1) - np.timedelta64(1, 'm')
@@ -89,12 +97,12 @@ def main(options, args):
     # df.set_index(columnas[0], inplace=True)
     print('Recopilando datos minutales')
     while fecha_i <= fecha_fin:
-        try:
-            esta = df.loc[fecha_i]
-        except:
-            print(3, fecha_i, file=flog, sep=',')
-            print('Error en la fecha ', fecha_i, file=sys.stderr)
-        #        print(fecha_i, file=ffechas)
+        if fecha_i not in df.index:
+            if fecha_i - np.timedelta64(1, 'm') in horasluz[1]:
+                fecha_i = horasluz[0][horasluz[1].index(fecha_i - np.timedelta64(1, 'm')) + 1]
+            else:
+                print(4, fecha_i, file=flog, sep=',')
+                print('Error en la hora ', fecha_i, file=sys.stderr)
         fecha_i += np.timedelta64(1, 'm')
         # TODO obtener los datos de esa marca temporal para cada una de las estaciones, incrementar en minutos
 
