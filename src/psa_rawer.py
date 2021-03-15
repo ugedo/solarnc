@@ -118,21 +118,31 @@ def main(options, args):
 
     # Se crea diccionario de fechas asociando la estación, fecha y fichero (de datos de esa estación para esa fecha)
     df_stations = {}
-    s = 'METAS'
     print('Reading METAS data')
-    horasluz, df_stations[s] = import_metas_data(glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s)), flog)
+    horasluz, df_metas = import_metas_data(glob.glob("{}/../{}METAS/Minutos/*.dat".format(schema_path, path)), flog)
     print('Reading stantions data')
     for s in stations:
         if s != 'METAS':
+            print(s)
             infiles = glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s))
             df_stations[s] = import_station_data(infiles, s, horasluz, flog)
+            df_metas = df_metas.join(df_stations[s], rsuffix=str('_' + s))
 
         # Se obtiene fecha comienzo de la muestra de datos de la estación
-        print('Acotando las fechas de la muestra...')
-        minima = min(df_stations[s].index) if 'minima' not in locals() else min(min(df_stations[s].index), minima)
-        maxima = max(df_stations[s].index) if 'maxima' not in locals() else max(max(df_stations[s].index), maxima)
+        # print('Acotando las fechas de la muestra...')
+        # minima = min(df_stations[s].index) if 'minima' not in locals() else min(min(df_stations[s].index), minima)
+        # maxima = max(df_stations[s].index) if 'maxima' not in locals() else max(max(df_stations[s].index), maxima)
 
     # minutar(df_stations['METAS'], minima, maxima, horasluz, flog)
+
+    outname = "{}/../{}/".format(schema_path, outpath)
+    print('Exportando a CSV')
+    df_metas.to_csv(str(outpath + '/raw.dat'))
+    # Exportar a fichero de texto .txt
+    print('Exportando a TXT')
+    f = open(str(outpath + '/raw.txt'), 'w')
+    f.write(df_metas.to_string())
+    f.close()
 
     print('0', datetime.now().strftime('%H:%M:%S.%f'), file=flog, sep=',')
     flog.close()

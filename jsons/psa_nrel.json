@@ -57,7 +57,8 @@
 	"rawer": {
 		"inpath": "data/PSA/",
 		"outpath": "data/PSA/raw",
-		"stations": ["CESA_NORTE", "METAS"],
+		"stations": ["CESA_NORTE", "CESA_SUR", "PROMETEO", "CRS",
+			"DESALACION", "NEW_METEO", "HORNO", "METAS"],
 		"module": "psa_rawer"
 	},
 	"format": {
