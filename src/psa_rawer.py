@@ -24,10 +24,22 @@ def parse_options():
     return options, args
 
 
-def import_metas_data(infiles, flog):
+def drop_unused(df, columns):
+    df.drop(columns=["Max", "Min", "Std", "Smp", "Tot"], level=2, inplace=True)
+    df.drop(columns=["RN"], level=1, inplace=True)
+    elegibles = ["Directa_Media", "Global_Media", "Temp_Global", "Difusa_Media", "Temp_Difusa"]
+    for c in elegibles:
+        if c not in columns:
+            df.drop(columns=c, level=0, inplace=True)
+
+
+def import_metas_data(infiles, flog, columns_selected):
     horasluz = {}
     for d in infiles:
         df = snc.read_csv(d, [1, 2, 3])
+        for x in [34, 33, 32, 31, 29, 28, 27, 26, 22, 18, 14]:
+            df.drop(columns=df.columns[x], inplace=True)
+        drop_unused(df, columns_selected)
         df = df[df[('Elevacion', 'deg', 'Avg')] > 7]
         amanecer = min(df.index)
         ocaso = max(df.index)
@@ -40,6 +52,7 @@ def import_metas_data(infiles, flog):
                 df.loc[ocaso][('Elevacion', 'deg', 'Avg')] > 7.2:
             print(5, amanecer, ocaso, file=flog, sep=',')
             print('Error en amanecer/ocaso', amanecer, ocaso, file=sys.stderr)
+        df.drop(columns=["Elevacion"], level=0, inplace=True)
 
         if 'df_station' not in locals():
             df_station = pd.DataFrame(columns=df.columns)
@@ -48,9 +61,11 @@ def import_metas_data(infiles, flog):
     return horasluz, df_station
 
 
-def import_station_data(infiles, s, horasluz, flog):
+def import_station_data(infiles, s, horasluz, flog, columns_selected):
     for d in infiles:
         df = snc.read_csv(d, [1, 2, 3])
+        df.drop(columns=["Max", "Min", "Std"], level=2, inplace=True)
+        df.drop(columns=["RN"], level=1, inplace=True)
         dia = df.index[1].date()
 
         if 'df_station' not in locals():
@@ -103,6 +118,10 @@ def main(options, args):
     print("Selected stations:")
     print(stations)
 
+    columns_selected = rconfig['columns']
+    print("Selected columns:")
+    print(columns_selected)
+
     current_file = os.path.realpath(__file__)
     schema_path = os.path.dirname(current_file)
     schema_fname = "{}/../jsons/solarnc_schema.json".format(schema_path)
@@ -119,14 +138,16 @@ def main(options, args):
     # Se crea diccionario de fechas asociando la estación, fecha y fichero (de datos de esa estación para esa fecha)
     df_stations = {}
     print('Reading METAS data')
-    horasluz, df_metas = import_metas_data(glob.glob("{}/../{}METAS/Minutos/*.dat".format(schema_path, path)), flog)
+    infiles = glob.glob("{}/../{}METAS/Minutos/*.dat".format(schema_path, path))
+    horasluz, df_metas = import_metas_data(infiles, flog, columns_selected)
     print('Reading stantions data')
     for s in stations:
         if s != 'METAS':
             print(s)
             infiles = glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s))
-            df_stations[s] = import_station_data(infiles, s, horasluz, flog)
+            df_stations[s] = import_station_data(infiles, s, horasluz, flog, columns_selected)
             df_metas = df_metas.join(df_stations[s], rsuffix=str('_' + s))
+            # TODO eliminar los dataframes que ya se han concatenado
 
         # Se obtiene fecha comienzo de la muestra de datos de la estación
         # print('Acotando las fechas de la muestra...')
