@@ -57,7 +57,7 @@
 	"rawer": {
 		"inpath": "data/PSA/",
 		"outpath": "data/PSA/raw",
-		"stations": ["METAS"],
+		"stations": ["CESA_NORTE", "METAS"],
 		"module": "psa_rawer"
 	},
 	"format": {

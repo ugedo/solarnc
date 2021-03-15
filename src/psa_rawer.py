@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import timedelta
 from datetime import datetime
 import solarnc as snc
 import pandas as pd
@@ -22,6 +23,60 @@ def parse_options():
         parser.error("missing json config file")
     return options, args
 
+
+def import_metas_data(infiles, flog):
+    horasluz = {}
+    for d in infiles:
+        df = snc.read_csv(d, [1, 2, 3])
+        df = df[df[('Elevacion', 'deg', 'Avg')] > 7]
+        amanecer = min(df.index)
+        ocaso = max(df.index)
+        dia = amanecer.date()
+        if dia not in horasluz:
+            horasluz[dia] = (amanecer, ocaso)
+        else:
+            horasluz[dia] = (min(amanecer, horasluz[dia][0]), max(ocaso, horasluz[dia][1]))
+        if df.loc[amanecer][('Elevacion', 'deg', 'Avg')] > 7.2 or \
+                df.loc[ocaso][('Elevacion', 'deg', 'Avg')] > 7.2:
+            print(5, amanecer, ocaso, file=flog, sep=',')
+            print('Error en amanecer/ocaso', amanecer, ocaso, file=sys.stderr)
+
+        if 'df_station' not in locals():
+            df_station = pd.DataFrame(columns=df.columns)
+        df_station = pd.concat([df_station, df])
+
+    return horasluz, df_station
+
+
+def import_station_data(infiles, s, horasluz, flog):
+    for d in infiles:
+        df = snc.read_csv(d, [1, 2, 3])
+        dia = df.index[1].date()
+
+        if 'df_station' not in locals():
+            df_station = pd.DataFrame(columns=df.columns)
+
+        if dia not in horasluz:
+            print(6, dia, s, file=flog, sep=',')
+            print('Geometría solar no disponible para el día', dia, file=sys.stderr)
+        else:
+            df = df[(df.index >= horasluz[dia][0]) & (df.index <= horasluz[dia][1])]
+            df_station = pd.concat([df_station, df])
+
+    return df_station
+
+
+def minutar(df, fecha_i, fecha_fin, horasluz, flog):
+    print('Recopilando datos minutales')
+    while fecha_i <= fecha_fin:
+        dia = fecha_i.date()
+        while fecha_i <= horasluz[dia][1]:
+            if fecha_i not in df.index:
+                print(4, fecha_i, file=flog, sep=',')
+                print('Error en la hora', fecha_i, file=sys.stderr)
+            fecha_i += np.timedelta64(1, 'm')
+        fecha_i = horasluz.get(dia + timedelta(days=1), (fecha_i, fecha_i))[0]
+        # TODO obtener los datos de esa marca temporal para cada una de las estaciones, incrementar en minutos (merge)
 
 # TODO filtrar datos con valores físicamente imposible, según las indicaciones de la BSRN (mirar en el libro)
 # TODO generar log con los datos que se han filtrado y un código de error que indique el motivo
@@ -63,62 +118,24 @@ def main(options, args):
 
     # Se crea diccionario de fechas asociando la estación, fecha y fichero (de datos de esa estación para esa fecha)
     df_stations = {}
-    infiles = {}
-    horasluz = ([], [])
+    s = 'METAS'
+    print('Reading METAS data')
+    horasluz, df_stations[s] = import_metas_data(glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s)), flog)
     print('Reading stantions data')
     for s in stations:
-        infiles[s] = glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s))
-
-        # DONE añadir la opción de que para un mismo día exista más de un fichero
-        for d in infiles[s]:
-            df = snc.read_csv(d, [1, 2, 3])
-            df = df[df[('Elevacion', 'deg', 'Avg')] > 7]
-            amanecer = min(df.index)
-            ocaso = max(df.index)
-            horasluz[0].append(amanecer)
-            horasluz[1].append(ocaso)
-            if df.loc[amanecer][('Elevacion', 'deg', 'Avg')] > 7.2 or \
-                    df.loc[ocaso][('Elevacion', 'deg', 'Avg')] > 7.2:
-                print(5, amanecer, ocaso, file=flog, sep=',')
-                print('Error en amanecer/ocaso', amanecer, ocaso, file=sys.stderr)
-
-            # primeramanecer = df_stations['METAS'][df_stations['METAS'].index < np.datetime64('2018-01-01 10:00:00')][('Elevacion', 'deg', 'Avg')][0]
-            # df_stations['METAS'][(df_stations['METAS'].index < np.datetime64('2019-01-01 10:00:00')) & (df_stations['METAS'].index > np.datetime64('2019-01-01 07:00:00'))][('Elevacion', 'deg', 'Avg')][0]
-
-            if s not in df_stations:
-                columnas = df.columns
-                df_stations[s] = pd.DataFrame(columns=columnas)
-            df_stations[s] = pd.concat([df_stations[s], df])
+        if s != 'METAS':
+            infiles = glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s))
+            df_stations[s] = import_station_data(infiles, s, horasluz, flog)
 
         # Se obtiene fecha comienzo de la muestra de datos de la estación
         print('Acotando las fechas de la muestra...')
         minima = min(df_stations[s].index) if 'minima' not in locals() else min(min(df_stations[s].index), minima)
         maxima = max(df_stations[s].index) if 'maxima' not in locals() else max(max(df_stations[s].index), maxima)
 
-    horasluz[0].sort()
-    horasluz[1].sort()
-
-    # Se crea variable a las 0:00 del día inicio de la muestra a las 0:00 y final a las 23:59
-    fecha_i = minima# + np.timedelta64(0, 'm')
-    fecha_fin = maxima #np.datetime64(maxima + 1) - np.timedelta64(1, 'm')
-    ffechas = os.path.dirname(os.path.realpath(__file__)) + "/../logs/" + 'fechas.txt'
-    ffechas = open(ffechas, 'w')
-    df = df_stations['METAS']
-    # df.set_index(columnas[0], inplace=True)
-    print('Recopilando datos minutales')
-    while fecha_i <= fecha_fin:
-        if fecha_i not in df.index:
-            if fecha_i - np.timedelta64(1, 'm') in horasluz[1]:
-                fecha_i = horasluz[0][horasluz[1].index(fecha_i - np.timedelta64(1, 'm')) + 1]
-            else:
-                print(4, fecha_i, file=flog, sep=',')
-                print('Error en la hora', fecha_i, file=sys.stderr)
-        fecha_i += np.timedelta64(1, 'm')
-        # TODO obtener los datos de esa marca temporal para cada una de las estaciones, incrementar en minutos
+    # minutar(df_stations['METAS'], minima, maxima, horasluz, flog)
 
     print('0', datetime.now().strftime('%H:%M:%S.%f'), file=flog, sep=',')
     flog.close()
-    ffechas.close()
 
 
 if __name__ == "__main__":
