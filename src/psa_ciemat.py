@@ -40,7 +40,7 @@ def format_data(infile, outpath, ghi_columns, rejectpath):
         snc.save_csv(df, "{}/{}.csv".format(outpath, day))
 
 
-def nrelformat(dtset, fconfig, npjobs):
+def ciematformat(dtset, fconfig, npjobs):
     path = dtset['path']
     print("Input files:")
     infiles = glob.glob("{}/*.txt".format(path))

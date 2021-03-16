@@ -66,7 +66,7 @@
 		"outpath": "out_format/psa/",
 		"stations": ["CESA_NORTE", "CESA_SUR", "PROMETEO", "CRS",
 			"DESALACION", "NEW_METEO", "HORNO", "METAS"],
-		"module": "psa_nrel",
+		"module": "psa_ciemat",
 		"fname": "nrelformat",
 		"rejectpath": "out_format/psa/reject",
 		"skip existing": false
