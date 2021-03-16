@@ -24,22 +24,13 @@ def parse_options():
     return options, args
 
 
-def drop_unused(df, columns):
-    df.drop(columns=["Max", "Min", "Std", "Smp", "Tot"], level=2, inplace=True)
-    df.drop(columns=["RN"], level=1, inplace=True)
-    elegibles = ["Directa_Media", "Global_Media", "Temp_Global", "Difusa_Media", "Temp_Difusa"]
-    for c in elegibles:
-        if c not in columns:
-            df.drop(columns=c, level=0, inplace=True)
-
-
 def import_metas_data(infiles, flog, columns_selected):
     horasluz = {}
     for d in infiles:
         df = snc.read_csv(d, [1, 2, 3])
-        for x in [34, 33, 32, 31, 29, 28, 27, 26, 22, 18, 14]:
-            df.drop(columns=df.columns[x], inplace=True)
-        drop_unused(df, columns_selected)
+        # df.droplevel([1, 2], axis='columns')
+        columns_selected_metas = ['Elevacion'] + columns_selected
+        df = df[columns_selected_metas]
         df = df[df[('Elevacion', 'deg', 'Avg')] > 7]
         amanecer = min(df.index)
         ocaso = max(df.index)
@@ -64,8 +55,7 @@ def import_metas_data(infiles, flog, columns_selected):
 def import_station_data(infiles, s, horasluz, flog, columns_selected):
     for d in infiles:
         df = snc.read_csv(d, [1, 2, 3])
-        df.drop(columns=["Max", "Min", "Std"], level=2, inplace=True)
-        df.drop(columns=["RN"], level=1, inplace=True)
+        df = df[columns_selected]
         dia = df.index[1].date()
 
         if 'df_station' not in locals():
@@ -91,12 +81,11 @@ def minutar(df, fecha_i, fecha_fin, horasluz, flog):
                 print('Error en la hora', fecha_i, file=sys.stderr)
             fecha_i += np.timedelta64(1, 'm')
         fecha_i = horasluz.get(dia + timedelta(days=1), (fecha_i, fecha_i))[0]
-        # TODO obtener los datos de esa marca temporal para cada una de las estaciones, incrementar en minutos (merge)
+
 
 # TODO filtrar datos con valores físicamente imposible, según las indicaciones de la BSRN (mirar en el libro)
 # TODO generar log con los datos que se han filtrado y un código de error que indique el motivo
 # TODO incluir en el log los momentos para los que alguna estación no tiene datos registrados
-# TODO obtener datos de elevación solar y eliminar los registros con una elevación inferior a 7º
 
 
 def main(options, args):
@@ -143,11 +132,12 @@ def main(options, args):
     print('Reading stantions data')
     for s in stations:
         if s != 'METAS':
-            print(s)
+            print('   ' + s)
             infiles = glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s))
             df_stations[s] = import_station_data(infiles, s, horasluz, flog, columns_selected)
             df_metas = df_metas.join(df_stations[s], rsuffix=str('_' + s))
-            # TODO eliminar los dataframes que ya se han concatenado
+            # Una vez concatenado se elimina para ahorrar espacio en memoria
+            df_stations.pop(s)
 
         # Se obtiene fecha comienzo de la muestra de datos de la estación
         # print('Acotando las fechas de la muestra...')
@@ -158,10 +148,10 @@ def main(options, args):
 
     outname = "{}/../{}/".format(schema_path, outpath)
     print('Exportando a CSV')
-    df_metas.to_csv(str(outpath + '/raw.dat'))
+    df_metas.to_csv(str(outpath + '/rawGlobalOnly.dat'), header=False)
     # Exportar a fichero de texto .txt
     print('Exportando a TXT')
-    f = open(str(outpath + '/raw.txt'), 'w')
+    f = open(str(outpath + '/rawGlobalOnly.txt'), 'w')
     f.write(df_metas.to_string())
     f.close()
 
