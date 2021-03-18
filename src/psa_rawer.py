@@ -111,13 +111,9 @@ def main(options, args):
     print("Selected columns:")
     print(columns_selected)
 
-    current_file = os.path.realpath(__file__)
-    schema_path = os.path.dirname(current_file)
-    schema_fname = "{}/../jsons/solarnc_schema.json".format(schema_path)
-
     # Se crea y abre fichero de log
     flog = datetime.now()
-    flog = os.path.dirname(current_file) + "/../logs/" + flog.strftime('%Y-%m-%d_%H%M') + '.txt'
+    flog = os.path.dirname(os.path.realpath(__file__)) + "/../logs/" + flog.strftime('%Y-%m-%d_%H%M') + '.txt'
     if not os.path.exists(os.path.dirname(flog)):
         os.makedirs(flog)
     flog = open(flog, 'w')
@@ -127,13 +123,13 @@ def main(options, args):
     # Se crea diccionario de fechas asociando la estación, fecha y fichero (de datos de esa estación para esa fecha)
     df_stations = {}
     print('Reading METAS data')
-    infiles = glob.glob("{}/../{}METAS/Minutos/*.dat".format(schema_path, path))
+    infiles = glob.glob("{}/METAS/Minutos/*.dat".format(path))
     horasluz, df_metas = import_metas_data(infiles, flog, columns_selected)
     print('Reading stantions data')
     for s in stations:
         if s != 'METAS':
             print('   ' + s)
-            infiles = glob.glob("{}/../{}{}/Minutos/*.dat".format(schema_path, path, s))
+            infiles = glob.glob("{}/{}/Minutos/*.dat".format(path, s))
             df_stations[s] = import_station_data(infiles, s, horasluz, flog, columns_selected)
             df_metas = df_metas.join(df_stations[s], rsuffix=str('_' + s))
             # Una vez concatenado se elimina para ahorrar espacio en memoria
@@ -146,12 +142,11 @@ def main(options, args):
 
     # minutar(df_stations['METAS'], minima, maxima, horasluz, flog)
 
-    outname = "{}/../{}/".format(schema_path, outpath)
     print('Exportando a CSV')
-    df_metas.to_csv(str(outpath + '/rawGlobalOnly.dat'), header=False)
+    df_metas.to_csv('{}/rawGlobalOnly.dat'.format(outpath), header=False)
     # Exportar a fichero de texto .txt
     print('Exportando a TXT')
-    f = open(str(outpath + '/rawGlobalOnly.txt'), 'w')
+    f = open('{}/rawGlobalOnly.txt'.format(outpath), 'w')
     f.write(df_metas.to_string())
     f.close()
 

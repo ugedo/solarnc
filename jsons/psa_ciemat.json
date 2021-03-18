@@ -1,7 +1,7 @@
 {
 	"dataset": {
 		"name": "PSA NREL",
-		"path": "data/PSA/raw",
+		"path": "../data/PSA",
 		"timezone": "UTC",
 		"stations": [
 			{
@@ -54,21 +54,14 @@
 			}
 		]
 	},
-	"rawer": {
-		"inpath": "data/PSA/",
-		"outpath": "data/PSA/raw",
+	"format": {
+		"outpath": "../data/PSA/raw",
 		"stations": ["CESA_NORTE", "CESA_SUR", "PROMETEO", "CRS",
 			"DESALACION", "NEW_METEO", "HORNO", "METAS"],
 		"columns": ["Global_Media"],
-		"module": "psa_rawer"
-	},
-	"format": {
-		"outpath": "out_format/psa/",
-		"stations": ["CESA_NORTE", "CESA_SUR", "PROMETEO", "CRS",
-			"DESALACION", "NEW_METEO", "HORNO", "METAS"],
-		"module": "psa_ciemat",
-		"fname": "nrelformat",
-		"rejectpath": "out_format/psa/reject",
+		"module": "psa_rawer",
+		"fname": "ciematformat",
+		"rejectpath": "../data/PSA/reject",
 		"skip existing": false
 	},
 	"extend": {
