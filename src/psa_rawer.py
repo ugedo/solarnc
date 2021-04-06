@@ -95,19 +95,19 @@ def main(options, args):
     dtset = config['dataset']
     print("Dataset: {}".format(dtset['name']))
 
-    rconfig = config['rawer']
-    path = rconfig['inpath']
+    fconfig = config['format']
+    path = dtset['path']
     print("Input files from {}".format(path))
-    outpath = rconfig['outpath']
+    outpath = fconfig['outpath']
     print("Output files to {}".format(outpath))
     if not os.path.exists(outpath):
         os.makedirs(outpath)
 
-    stations = rconfig['stations']
+    stations = fconfig['stations']
     print("Selected stations:")
     print(stations)
 
-    columns_selected = rconfig['columns']
+    columns_selected = fconfig['columns']
     print("Selected columns:")
     print(columns_selected)
 
