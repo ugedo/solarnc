@@ -63,9 +63,9 @@ def format_data(df, outpath, rejectpath, horasluz, flog, columns_selected):
     if horasluz is not None:
         dfd = df[(df.index >= horasluz[0]) & (df.index <= horasluz[1])]
         day = dfd.index[0].date()
+        dfd = dfd.astype(float, copy=False)
         # small negative values are truncated to 0
-        # dfd[dfd.lt(0) & dfd.gt(-1)] = 0 # TODO. Uso deprecado. usar loc[].
-        # TODO Error, Prometeo y Desalacion column type is object not float. Comprobar...
+        dfd[dfd.lt(0) & dfd.gt(-1)] = 0
         # large negative values are errors
         rem_neg_cols = dfd.lt(0).sum().gt(0).sum()
         if rem_neg_cols > 0:

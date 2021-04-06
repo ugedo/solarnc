@@ -56,8 +56,8 @@
 	},
 	"format": {
 		"outpath": "../data/PSA/format",
-		"stations": ["CESA_NORTE", "CESA_SUR", "CRS",
-			"NEW_METEO", "HORNO", "METAS"],
+		"stations": ["CESA_NORTE", "CESA_SUR", "PROMETEO", "CRS",
+			"DESALACION", "NEW_METEO", "HORNO", "METAS"],
 		"columns": ["Global_Media"],
 		"module": "psa_ciemat",
 		"fname": "ciematformat",
