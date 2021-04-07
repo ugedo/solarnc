@@ -59,19 +59,20 @@ def import_station_data(infiles, s, horasluz, flog, columns_selected):
     return df_station
 
 
-def format_data(df, outpath, rejectpath, horasluz, flog, columns_selected):
+def format_data(df, outpath, rejectpath, horasluz, day, flog, columns_selected):
     if horasluz is not None:
         dfd = df[(df.index >= horasluz[0]) & (df.index <= horasluz[1])]
-        day = dfd.index[0].date()
+        if dfd.empty:
+            return
         dfd = dfd.astype(float, copy=False)
         # small negative values are truncated to 0
         dfd[dfd.lt(0) & dfd.gt(-1)] = 0
         # large negative values are errors
         rem_neg_cols = dfd.lt(0).sum().gt(0).sum()
         if rem_neg_cols > 0:
-            snc.save_csv(dfd, "{}/{}.csv".format(rejectpath, day))
+            snc.save_csv(dfd.droplevel([1, 2], axis=1), "{}/{}.csv".format(rejectpath, day))
         else:
-            snc.save_csv(dfd, "{}/{}.csv".format(outpath, day))
+            snc.save_csv(dfd.droplevel([1, 2], axis=1), "{}/{}.csv".format(outpath, day))
     else:
         print(6, file=flog, sep=',')
         print('Geometría solar no disponible para el día desconocido', file=sys.stderr)
@@ -107,26 +108,29 @@ def ciematformat(dtset, fconfig, npjobs):
     print('Loging...')
     print('0', datetime.now().strftime('%H:%M:%S.%f'), file=flog, sep=',')
 
+    df_stations = {}
     print('Reading METAS data')
     infiles = glob.glob("{}/METAS/Minutos/*.dat".format(path))
-    horasluz, df_metas = import_metas_data(infiles, flog, columns_selected)
+    horasluz, df_stations['METAS'] = import_metas_data(infiles, flog, columns_selected)
 
     print('Reading stantions data')
+    df_fin = df_stations['METAS'].drop(columns=df_stations['METAS'].columns[0])
     for s in stations:
         if s != 'METAS':
             print('   ' + s)
             infiles = glob.glob("{}/{}/Minutos/*.dat".format(path, s))
-            df_station = import_station_data(infiles, s, horasluz, flog, columns_selected)
-            df_metas = df_metas.join(df_station, rsuffix=str('_' + s))
-            # Una vez concatenado se elimina para ahorrar espacio en memoria
-            df_station = None
+            df_stations[s] = import_station_data(infiles, s, horasluz, flog, columns_selected)
+        df_fin = df_fin.join(df_stations[s], rsuffix=str('_' + s))
+        # Una vez concatenado se elimina para ahorrar espacio en memoria
+        df_stations.pop(s)
 
-    day = min(horasluz.keys())
-    last_day = max(horasluz.keys())
+    print('Exportando datos...')
+    df_fin.dropna(inplace=True)
+    day = min(df_fin.index).date()
+    last_day = max(df_fin.index).date()
     while day <= last_day:
-        format_data(df_metas, outpath, rejectpath, horasluz[day], flog, columns_selected)
+        format_data(df_fin, outpath, rejectpath, horasluz[day], day, flog, columns_selected)
         day += timedelta(days=1)
-
 
     # Se cierra el fichero de log
     print('0', datetime.now().strftime('%H:%M:%S.%f'), file=flog, sep=',')
