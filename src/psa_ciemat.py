@@ -59,14 +59,25 @@ def import_station_data(infiles, s, horasluz, flog, columns_selected):
     return df_station
 
 
-def format_data(df, outpath, rejectpath, horasluz, day, flog, columns_selected):
+def format_data(df, outpath, rejectpath, horasluz, day, flog):
+    completos = False
     if horasluz is not None:
         dfd = df[(df.index >= horasluz[0]) & (df.index <= horasluz[1])]
-        if dfd.empty:
-            return
-        dfd = dfd.astype(float, copy=False)
+        if dfd.empty or dfd.notna().sum().sum() == 0:
+            return 0
+        if dfd.notna().sum().gt(0).sum() == len(dfd.columns):
+            # print('Día {} completo para todas las estaciones'.format(day))
+            completos = True
+            for d in dfd.columns:
+                if dfd.isna().sum()[d] > 0:
+                    dfc = dfd[dfd.loc[:, d].isnull()]
+                    seguidos = dfc.index.to_series().diff().eq(np.timedelta64(1, 'm')).sum()
+                    print('9', day, d[0], dfd.isna().sum()[d], dfd.shape[0], seguidos, file=flog, sep=',')
+                    # print(day, d[0], 'Valores nulos:', dfd.isna().sum()[d], 'de', dfd.shape[0],
+                      #     '.Seguidos', seguidos, file=sys.stderr)
+                    dfc = None
         # small negative values are truncated to 0
-        dfd[dfd.lt(0) & dfd.gt(-1)] = 0
+        # dfd[dfd.lt(0) & dfd.gt(-1)] = 0
         # large negative values are errors
         rem_neg_cols = dfd.lt(0).sum().gt(0).sum()
         if rem_neg_cols > 0:
@@ -74,8 +85,9 @@ def format_data(df, outpath, rejectpath, horasluz, day, flog, columns_selected):
         else:
             snc.save_csv(dfd.droplevel([1, 2], axis=1), "{}/{}.csv".format(outpath, day))
     else:
-        print(6, file=flog, sep=',')
+        print('6', file=flog, sep=',')
         print('Geometría solar no disponible para el día desconocido', file=sys.stderr)
+    return completos
 
 
 def ciematformat(dtset, fconfig, npjobs):
@@ -114,23 +126,29 @@ def ciematformat(dtset, fconfig, npjobs):
     horasluz, df_stations['METAS'] = import_metas_data(infiles, flog, columns_selected)
 
     print('Reading stantions data')
-    df_fin = df_stations['METAS'].drop(columns=df_stations['METAS'].columns[0])
+    df_fin = df_stations['METAS']
     for s in stations:
         if s != 'METAS':
             print('   ' + s)
             infiles = glob.glob("{}/{}/Minutos/*.dat".format(path, s))
             df_stations[s] = import_station_data(infiles, s, horasluz, flog, columns_selected)
-        df_fin = df_fin.join(df_stations[s], rsuffix=str('_' + s))
+        df_fin = df_fin.join(df_stations[s], rsuffix=str('__' + s))
         # Una vez concatenado se elimina para ahorrar espacio en memoria
         df_stations.pop(s)
 
     print('Exportando datos...')
-    df_fin.dropna(inplace=True)
+    df_fin.drop(columns=df_stations['METAS'].columns, inplace=True)
+    df_fin = df_fin.astype(float, copy=False)
+    # print("Hay {} registros diarios completos con datos de todas las estaciones".format(df_fin.dropna().shape[0]))
+    # df_fin.dropna(inplace=True)  # Ojo, esto elimina cualquier fila en la que haya un solo dato no nulo.
     day = min(df_fin.index).date()
     last_day = max(df_fin.index).date()
+    completos = 0
     while day <= last_day:
-        format_data(df_fin, outpath, rejectpath, horasluz[day], day, flog, columns_selected)
+        completos += format_data(df_fin, outpath, rejectpath, horasluz[day], day, flog)
         day += timedelta(days=1)
+    print('Hay {} dias completos con datos de todas las estaciones seleccionadas.'.format(completos))
+    print('10', completos, file=flog, sep=',')
 
     # Se cierra el fichero de log
     print('0', datetime.now().strftime('%H:%M:%S.%f'), file=flog, sep=',')
