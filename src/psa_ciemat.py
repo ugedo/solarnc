@@ -68,14 +68,19 @@ def format_data(df, outpath, rejectpath, horasluz, day, flog):
         if dfd.notna().sum().gt(0).sum() == len(dfd.columns):
             # print('Día {} completo para todas las estaciones'.format(day))
             completos = True
-            for d in dfd.columns:
-                if dfd.isna().sum()[d] > 0:
-                    dfc = dfd[dfd.loc[:, d].isnull()]
-                    seguidos = dfc.index.to_series().diff().eq(np.timedelta64(1, 'm')).sum()
-                    print('9', day, d[0], dfd.isna().sum()[d], dfd.shape[0], seguidos, file=flog, sep=',')
-                    # print(day, d[0], 'Valores nulos:', dfd.isna().sum()[d], 'de', dfd.shape[0],
-                      #     '.Seguidos', seguidos, file=sys.stderr)
-                    dfc = None
+            if dfd.isna().sum().gt(0).sum() > 1:
+                print('11', day, dfd.isna().sum().gt(0).sum(), file=flog, sep=',')
+                df.drop(dfd.index, inplace=True)
+                completos = False
+            else:
+                for d in dfd.columns:
+                    if dfd.isna().sum()[d] > 0:
+                        dfc = dfd[dfd.loc[:, d].isnull()]
+                        seguidos = dfc.index.to_series().diff().eq(np.timedelta64(1, 'm')).sum()
+                        print('9', day, d[0], dfd.isna().sum()[d], dfd.shape[0], seguidos, file=flog, sep=',')
+                        # print(day, d[0], 'Valores nulos:', dfd.isna().sum()[d], 'de', dfd.shape[0],
+                          #     '.Seguidos', seguidos, file=sys.stderr)
+                        dfc = None
         # small negative values are truncated to 0
         # dfd[dfd.lt(0) & dfd.gt(-1)] = 0
         # large negative values are errors
@@ -139,6 +144,7 @@ def ciematformat(dtset, fconfig, npjobs):
     print('Exportando datos...')
     df_fin.drop(columns=df_stations['METAS'].columns, inplace=True)
     df_fin = df_fin.astype(float, copy=False)
+    # TODO buscar forma de eliminar filas sin valores en ninguna columna.
     # print("Hay {} registros diarios completos con datos de todas las estaciones".format(df_fin.dropna().shape[0]))
     # df_fin.dropna(inplace=True)  # Ojo, esto elimina cualquier fila en la que haya un solo dato no nulo.
     day = min(df_fin.index).date()
