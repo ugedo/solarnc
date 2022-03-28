@@ -139,7 +139,8 @@ def ciematformat(dtset, fconfig, npjobs):
             df_stations[s] = import_station_data(infiles, s, horasluz, flog, columns_selected)
         df_fin = df_fin.join(df_stations[s], rsuffix=str('__' + s))
         # Una vez concatenado se elimina para ahorrar espacio en memoria
-        df_stations.pop(s)
+        if s != 'METAS':
+            df_stations.pop(s)
 
     print('Exportando datos...')
     df_fin.drop(columns=df_stations['METAS'].columns, inplace=True)
