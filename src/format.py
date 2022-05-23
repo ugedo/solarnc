@@ -38,10 +38,6 @@ def main(options, args):
     print("Selected stations:")
     print(stations)
 
-    columns_selected = fconfig['columns']
-    print("Selected columns:")
-    print(columns_selected)
-
     try:
         module = __import__(fconfig['module'])
         fun = getattr(module, fconfig['fname'])

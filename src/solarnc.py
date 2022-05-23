@@ -21,13 +21,7 @@ def load_config(fname):
 
 def read_csv(infile, tzone):
     df = pd.read_csv(infile, index_col = "datetime", parse_dates=True)
-    df.index = df.index.tz_localize('UTC').tz_convert(tzone)
-    return df
-
-
-def read_csv(infile, header):
-    df = pd.read_csv(infile, header=header, index_col=0, parse_dates=True)
-    # df.index = df.index.tz_localize('UTC').tz_convert(tzone)
+    df.index = df.index.tz_convert(tzone)
     return df
 
 def save_csv(df, outfile):
@@ -44,7 +38,7 @@ def read_list(fname):
         l = list(reader)
     return l[0]
 
-# pvlib provides: 'ineichen', 'haurwitz', 'simplified_solis'
+# pvlib provides: ‘ineichen’, ‘haurwitz’, ‘simplified_solis'
 def csm_pvlib(df, skip_existing, stations, models, position):
     def elevation_azimuth(df, solpos, staname, skip_existing):
         ecol = 'nelevation {}'.format(staname)
@@ -116,17 +110,17 @@ def runjobs(cbk, arglist, npjobs):
     nj = len(arglist)
     l = list(zip([cbk] * nj, arglist))
     j = 0;
-#    print("\rDone: {}/{}".format(j,nj), end='')
+    print("\rDone: {}/{}".format(j,nj), end='')
     if npjobs > 1:
         p = mp.Pool(npjobs)
         for x in p.imap(run_cbk_unpack, l):
             j += 1
-#            print("\rDone: {}/{}".format(j,nj), end='')
+            print("\rDone: {}/{}".format(j,nj), end='')
     else:
         for argtup in arglist:
             cbk(*argtup)
             j += 1
-#            print("\rDone: {}/{}".format(j,nj), end='')
+            print("\rDone: {}/{}".format(j,nj), end='')
     print("")
 
 def get_feature_target_data(ffiles, tfiles, tzone):
